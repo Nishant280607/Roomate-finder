@@ -1,0 +1,195 @@
+.roommate-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-lg, 20px);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(17, 16, 26, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.roommate-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(112, 72, 232, 0.1);
+  border-color: var(--border-focus, #C4B5FD);
+}
+
+.roommate-image-wrapper {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
+.roommate-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.compatibility-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+  color: #059669;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-full, 9999px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.save-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(6px);
+  color: var(--muted, #77748A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.save-button:hover {
+  transform: scale(1.1);
+  background: #FFFFFF;
+}
+
+.save-button.saved {
+  color: #EF4444;
+  background: #FFFFFF;
+}
+
+.roommate-content {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.roommate-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.roommate-name-row h3 {
+  font-size: 1.1rem;
+  color: var(--dark, #11101A);
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.roommate-name-row span {
+  font-size: 0.8rem;
+  color: var(--muted, #77748A);
+}
+
+.online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.roommate-location {
+  font-size: 0.82rem;
+  color: var(--muted, #77748A);
+  margin-bottom: 4px;
+}
+
+.roommate-occupation {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--dark, #11101A);
+  margin-bottom: 12px;
+}
+
+.roommate-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.roommate-tags span {
+  background: var(--bg-main, #F8F7FF);
+  color: var(--muted, #77748A);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.roommate-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lifestyle-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary, #7048E8);
+  background: var(--primary-light, #F0EBFF);
+  padding: 4px 10px;
+  border-radius: var(--radius-full, 9999px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.card-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-card-msg {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--primary-light, #F0EBFF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+
+.btn-card-msg:hover {
+  background: var(--primary, #7048E8);
+  color: #FFFFFF;
+}
+
+.view-profile-button {
+  background: var(--bg-main, #F8F7FF);
+  color: var(--dark, #11101A);
+  border: 1px solid var(--border, #ECEAF3);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm, 8px);
+  transition: all 0.2s ease;
+}
+
+.view-profile-button:hover {
+  border-color: var(--border-focus, #C4B5FD);
+  background: #FFFFFF;
+}
