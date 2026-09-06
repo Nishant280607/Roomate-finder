@@ -1,143 +1,171 @@
-export const conversations = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
-    online: true,
-    lastMessage: "That sounds great! Let's talk more.",
-    time: "10:42 AM",
-    unread: 2,
-  },
-  {
-    id: 2,
-    name: "David Wilson",
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
-    online: true,
-    lastMessage: "Are you free this weekend?",
-    time: "Yesterday",
-    unread: 1,
-  },
-  {
-    id: 3,
-    name: "Emma Davis",
-    image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-    online: false,
-    lastMessage: "I'll send you the details!",
-    time: "Yesterday",
-    unread: 0,
-  },
-  {
-    id: 4,
-    name: "Michael Brown",
-    image:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80",
-    online: false,
-    lastMessage: "Nice meeting you!",
-    time: "Mon",
-    unread: 0,
-  },
-];
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {
+  messageService,
+  initialConversations,
+  initialMessages,
+} from "../services/messageService";
+import "./Messages.css";
 
-export const messagesByConversation = {
-  1: [
-    {
-      id: 1,
-      sender: "them",
-      text: "Hey Alex! I saw that we're a 94% match.",
-      time: "10:31 AM",
-    },
-    {
-      id: 2,
-      sender: "me",
-      text: "Hey Sarah! Yes, that's pretty high 😄",
-      time: "10:34 AM",
-    },
-    {
-      id: 3,
-      sender: "them",
-      text: "Right? I noticed we both love coffee and yoga.",
-      time: "10:36 AM",
-    },
-    {
-      id: 4,
-      sender: "me",
-      text: "Absolutely! I'm also looking for a quiet and clean place.",
-      time: "10:39 AM",
-    },
-    {
-      id: 5,
-      sender: "them",
-      text: "That sounds great! Let's talk more.",
-      time: "10:42 AM",
-    },
-  ],
-
-  2: [
-    {
-      id: 1,
-      sender: "them",
-      text: "Hey Alex! How are you doing?",
-      time: "Yesterday",
-    },
-    {
-      id: 2,
-      sender: "me",
-      text: "I'm doing great! How about you?",
-      time: "Yesterday",
-    },
-    {
-      id: 3,
-      sender: "them",
-      text: "Pretty good! Are you free this weekend?",
-      time: "Yesterday",
-    },
-  ],
-
-  3: [
-    {
-      id: 1,
-      sender: "me",
-      text: "Hey Emma, nice to connect with you!",
-      time: "Yesterday",
-    },
-    {
-      id: 2,
-      sender: "them",
-      text: "Nice to connect with you too!",
-      time: "Yesterday",
-    },
-    {
-      id: 3,
-      sender: "them",
-      text: "I'll send you the details!",
-      time: "Yesterday",
-    },
-  ],
-
-  4: [
-    {
-      id: 1,
-      sender: "them",
-      text: "Thanks for connecting!",
-      time: "Mon",
-    },
-    {
-      id: 2,
-      sender: "me",
-      text: "Of course! Nice meeting you.",
-      time: "Mon",
-    },
-  ],
-};
+export const conversations = initialConversations;
+export const messagesByConversation = initialMessages;
 
 function Messages() {
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const targetUserId = searchParams.get("user");
+
+  const [conversationList, setConversationList] = useState(initialConversations);
+  const [activeConvId, setActiveConvId] = useState(1);
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (targetUserId) {
+      const found = conversationList.find((c) => String(c.id) === String(targetUserId));
+      if (found) setActiveConvId(found.id);
+    }
+  }, [targetUserId, conversationList]);
+
+  useEffect(() => {
+    async function load() {
+      const convs = await messageService.getConversations(user?.id);
+      setConversationList(convs);
+      const msgs = await messageService.getMessages(activeConvId);
+      setMessages(msgs);
+    }
+    load();
+  }, [user, activeConvId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
+
+  const activeConversation =
+    conversationList.find((c) => c.id === activeConvId) || conversationList[0];
+
+  async function handleSendMessage(e) {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+
+    const userMsg = await messageService.sendMessage(activeConvId, inputText.trim(), "me");
+    setMessages((prev) => [...prev, userMsg]);
+    setInputText("");
+
+    setIsTyping(true);
+    setTimeout(async () => {
+      setIsTyping(false);
+      const replies = [
+        "That sounds awesome! When would you be free for a quick video call?",
+        "Totally agree with you! Looking forward to chatting more about the place.",
+        "Yes, the neighborhood is super quiet and transit is just 5 minutes away!",
+        "Perfect, let me send you the floor plan and lease details tonight!",
+      ];
+      const randomReply = replies[Math.floor(Math.random() * replies.length)];
+      const botMsg = await messageService.sendMessage(activeConvId, randomReply, "them");
+      setMessages((prev) => [...prev, botMsg]);
+    }, 1400);
+  }
+
   return (
-    <div>
-      <h1>Messages</h1>
-      <p>Your conversations will appear here.</p>
+    <div className="messages-layout animate-fade-up">
+      <aside className="conversations-sidebar">
+        <div className="conversations-header">
+          <h2>Messages</h2>
+          <span className="unread-badge-total">4 unread</span>
+        </div>
+
+        <div className="conversations-scroll-list">
+          {conversationList.map((conv) => (
+            <div
+              key={conv.id}
+              className={`conversation-item ${conv.id === activeConvId ? "active" : ""}`}
+              onClick={() => setActiveConvId(conv.id)}
+            >
+              <div className="conv-avatar-box">
+                <img src={conv.image} alt={conv.name} />
+                {conv.online && <span className="online-indicator"></span>}
+              </div>
+
+              <div className="conv-info">
+                <div className="conv-top-row">
+                  <h4>{conv.name}</h4>
+                  <span className="conv-time">{conv.time}</span>
+                </div>
+                <div className="conv-bottom-row">
+                  <p className="conv-snippet">{conv.lastMessage}</p>
+                  {conv.unread > 0 && (
+                    <span className="conv-unread-count">{conv.unread}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      <main className="chat-window">
+        <div className="chat-header">
+          <div className="chat-recipient">
+            <div className="chat-recipient-avatar">
+              <img src={activeConversation.image} alt={activeConversation.name} />
+              {activeConversation.online && <span className="online-indicator"></span>}
+            </div>
+            <div>
+              <h3>{activeConversation.name}</h3>
+              <span className="chat-status-text">
+                {activeConversation.online ? "● Active now" : "Offline"} · {activeConversation.occupation}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="chat-messages-body">
+          <div className="chat-date-divider">
+            <span>Today</span>
+          </div>
+
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`message-bubble-row ${msg.sender === "me" ? "sent" : "received"}`}
+            >
+              <div className="message-bubble">
+                <p>{msg.text}</p>
+                <span className="message-timestamp">{msg.time}</span>
+              </div>
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className="typing-indicator-row">
+              <span className="typing-text">{activeConversation.name.split(" ")[0]} is typing</span>
+              <div className="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        <form className="chat-input-bar" onSubmit={handleSendMessage}>
+          <input
+            type="text"
+            placeholder="Type a message to discuss your next home..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+          />
+          <button type="submit" className="btn-send-message" disabled={!inputText.trim()}>
+            Send →
+          </button>
+        </form>
+      </main>
     </div>
   );
 }

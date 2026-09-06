@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./Settings.css";
+import "./settings.css";
 
 function Settings() {
   const [settings, setSettings] = useState({

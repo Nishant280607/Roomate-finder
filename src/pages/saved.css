@@ -1,137 +1,126 @@
 .saved-page {
-  max-width: 1500px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
-.saved-header {
+.saved-header-card {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 30px;
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-lg, 20px);
+  padding: 30px 36px;
+  box-shadow: var(--shadow-sm);
 }
 
 .saved-eyebrow {
-  color: #8b8da2;
-  font-size: 9px;
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.08em;
+  color: var(--primary, #7048E8);
+  margin-bottom: 6px;
+  display: block;
 }
 
-.saved-header h1 {
-  margin-top: 7px;
-  color: #19192c;
-  font-family: "Plus Jakarta Sans", sans-serif;
-  font-size: 34px;
-  font-weight: 800;
+.saved-header-card h1 {
+  font-size: 2rem;
+  color: var(--dark, #11101A);
+  margin-bottom: 4px;
 }
 
-.saved-header p {
-  margin-top: 6px;
-  color: #7c7e91;
-  font-size: 13px;
+.saved-header-card p {
+  font-size: 0.95rem;
+  color: var(--muted, #77748A);
 }
 
-.saved-count {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 14px;
-  border: 1px solid #e9e9f2;
-  border-radius: 12px;
-  background: #fff;
+.saved-count-pill {
+  background: var(--primary-light, #F0EBFF);
+  border: 1px solid var(--border-focus, #C4B5FD);
+  padding: 12px 24px;
+  border-radius: var(--radius-md, 14px);
+  text-align: center;
 }
 
-.saved-count strong {
-  color: #6366f1;
-  font-size: 18px;
+.saved-count-pill strong {
+  display: block;
+  font-size: 1.6rem;
+  color: var(--primary, #7048E8);
+  line-height: 1.1;
 }
 
-.saved-count span {
-  color: #8d8fa1;
-  font-size: 10px;
+.saved-count-pill span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted, #77748A);
 }
 
-.saved-results-heading {
-  margin-bottom: 18px;
-}
-
-.saved-results-heading h2 {
-  color: #202034;
-  font-size: 18px;
-}
-
-.saved-results-heading p {
-  margin-top: 3px;
-  color: #999bac;
-  font-size: 11px;
-}
-
-.saved-grid {
+.saved-cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+  gap: 24px;
 }
 
-.saved-card-wrapper {
-  position: relative;
-}
-
-.remove-saved {
-  width: 100%;
-  margin-top: 8px;
-  padding: 9px;
-  border: 1px solid #e8e8ef;
-  border-radius: 9px;
-  color: #77798c;
-  background: #fff;
-  font-size: 9px;
-  cursor: pointer;
-}
-
-.remove-saved:hover {
-  color: #ef4444;
-  border-color: #fecaca;
-}
-
-.saved-empty {
-  padding: 80px 20px;
+.saved-empty-box {
+  background: #FFFFFF;
+  border: 1px dashed var(--border-focus, #C4B5FD);
+  border-radius: var(--radius-lg, 20px);
+  padding: 70px 24px;
   text-align: center;
-  border: 1px dashed #dcdcea;
-  border-radius: 20px;
-  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
 }
 
-.saved-empty > div {
-  font-size: 35px;
-  color: #6366f1;
+.empty-bookmark-icon {
+  font-size: 2.8rem;
+  color: var(--primary, #7048E8);
+  margin-bottom: 4px;
 }
 
-.saved-empty h2 {
-  margin-top: 12px;
-  color: #303146;
-  font-size: 17px;
+.saved-empty-box h2 {
+  font-size: 1.4rem;
+  color: var(--dark, #11101A);
 }
 
-.saved-empty p {
-  margin-top: 5px;
-  color: #999bac;
-  font-size: 11px;
+.saved-empty-box p {
+  font-size: 0.95rem;
+  color: var(--muted, #77748A);
+  max-width: 440px;
 }
 
-@media (max-width: 1000px) {
-  .saved-grid {
+.btn-empty-discover {
+  margin-top: 10px;
+  background: var(--primary, #7048E8);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 28px;
+  border-radius: var(--radius-full, 9999px);
+  box-shadow: 0 4px 14px rgba(112, 72, 232, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-empty-discover:hover {
+  background: var(--primary-hover, #5F3DC4);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1100px) {
+  .saved-cards-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 600px) {
-  .saved-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .saved-header {
-    align-items: flex-start;
+@media (max-width: 768px) {
+  .saved-header-card {
     flex-direction: column;
-    gap: 15px;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .saved-cards-grid {
+    grid-template-columns: 1fr;
   }
 }

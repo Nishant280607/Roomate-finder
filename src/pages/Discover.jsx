@@ -1,192 +1,210 @@
-import { useMemo, useState } from "react";
-import { roommateData } from "../data/mockData";
+import { useState, useEffect, useMemo } from "react";
+import { useAuth } from "../context/AuthContext";
+import { roommateService } from "../services/roommateService";
+import { savedService } from "../services/savedService";
 import RoommateCard from "../components/RoommateCard";
+import RoommateModal from "../components/RoommateModal";
 import "./Discover.css";
 
 function Discover() {
+  const { user } = useAuth();
+  const [roommates, setRoommates] = useState([]);
+  const [savedIds, setSavedIds] = useState(new Set());
+  const [selectedRoommate, setSelectedRoommate] = useState(null);
+
+  // Filters
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("All locations");
+  const [lifestyle, setLifestyle] = useState("All");
   const [minMatch, setMinMatch] = useState(0);
+  const [sortBy, setSortBy] = useState("match");
+
+  useEffect(() => {
+    async function load() {
+      const data = await roommateService.getRoommates(user?.id);
+      setRoommates(data);
+      const saved = await savedService.getSaved(user?.id);
+      setSavedIds(new Set(saved.map((r) => String(r.id))));
+    }
+    load();
+  }, [user]);
+
+  async function handleToggleSave(roommate) {
+    const res = await savedService.toggleSave(user?.id, roommate);
+    setSavedIds(new Set(res.list.map((r) => String(r.id))));
+  }
 
   const filteredRoommates = useMemo(() => {
-    return roommateData.filter((roommate) => {
-      const searchValue = search.toLowerCase();
+    return roommates
+      .filter((r) => {
+        const query = search.toLowerCase();
+        const matchesQuery =
+          r.name.toLowerCase().includes(query) ||
+          r.occupation.toLowerCase().includes(query) ||
+          (r.interests && r.interests.some((i) => i.toLowerCase().includes(query))) ||
+          r.location.toLowerCase().includes(query);
 
-      const matchesSearch =
-        roommate.name.toLowerCase().includes(searchValue) ||
-        roommate.occupation.toLowerCase().includes(searchValue) ||
-        roommate.interests.some((interest) =>
-          interest.toLowerCase().includes(searchValue)
+        const matchesLocation =
+          location === "All locations" || r.location.includes(location);
+
+        const matchesLifestyle =
+          lifestyle === "All" ||
+          (r.lifestyle && r.lifestyle.toLowerCase().includes(lifestyle.toLowerCase()));
+
+        const matchesCompatibility = r.compatibility >= Number(minMatch);
+
+        return (
+          matchesQuery &&
+          matchesLocation &&
+          matchesLifestyle &&
+          matchesCompatibility
         );
-
-      const matchesLocation =
-        location === "All locations" ||
-        roommate.location.includes(location);
-
-      const matchesCompatibility =
-        roommate.compatibility >= Number(minMatch);
-
-      return (
-        matchesSearch &&
-        matchesLocation &&
-        matchesCompatibility
-      );
-    });
-  }, [search, location, minMatch]);
+      })
+      .sort((a, b) => {
+        if (sortBy === "match") return b.compatibility - a.compatibility;
+        if (sortBy === "age") return a.age - b.age;
+        return 0;
+      });
+  }, [roommates, search, location, lifestyle, minMatch, sortBy]);
 
   return (
-    <div className="discover-page">
-
-      {/* Page Header */}
-      <section className="discover-header">
+    <div className="discover-page animate-fade-up">
+      {/* Header */}
+      <section className="discover-header-card">
         <div>
-          <span className="discover-eyebrow">
-            FIND YOUR PERFECT MATCH
-          </span>
-
+          <span className="discover-eyebrow">FIND YOUR VIBE</span>
           <h1>Discover Roommates</h1>
-
           <p>
-            Explore people who could be a great match for your
-            lifestyle and living preferences.
+            Explore verified profiles filtered by lifestyle, personality, and location compatibility.
           </p>
         </div>
 
-        <div className="discover-result-count">
+        <div className="discover-count-badge">
           <strong>{filteredRoommates.length}</strong>
-          <span>people found</span>
+          <span>People Matching</span>
         </div>
       </section>
 
-      {/* Search and Filters */}
-      <section className="discover-filters">
-
-        <div className="search-box">
+      {/* Search & Filter Bar */}
+      <section className="discover-filters-panel">
+        <div className="discover-search-input-box">
           <span className="search-icon">⌕</span>
-
           <input
             type="text"
-            placeholder="Search by name, interest, or occupation..."
+            placeholder="Search by name, occupation, hobbies (e.g. Yoga, Coding, Coffee)..."
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
-
           {search && (
             <button
               type="button"
-              className="clear-search"
+              className="clear-search-btn"
               onClick={() => setSearch("")}
             >
-              ×
+              ✕
             </button>
           )}
         </div>
 
-        <div className="filter-row">
-
-          <div className="filter-group">
-            <label htmlFor="location">Location</label>
-
+        <div className="discover-filter-controls">
+          <div className="filter-select-group">
+            <label>Location</label>
             <select
-              id="location"
               value={location}
-              onChange={(event) => setLocation(event.target.value)}
+              onChange={(e) => setLocation(e.target.value)}
             >
               <option>All locations</option>
-              <option>New York</option>
-              <option>Brooklyn</option>
-              <option>Queens</option>
-              <option>Manhattan</option>
+              <option>New York, NY</option>
+              <option>Brooklyn, NY</option>
+              <option>Queens, NY</option>
+              <option>Manhattan, NY</option>
             </select>
           </div>
 
-          <div className="filter-group">
-            <label htmlFor="match">Minimum Match</label>
-
+          <div className="filter-select-group">
+            <label>Lifestyle</label>
             <select
-              id="match"
-              value={minMatch}
-              onChange={(event) => setMinMatch(event.target.value)}
+              value={lifestyle}
+              onChange={(e) => setLifestyle(e.target.value)}
             >
-              <option value="0">Any match</option>
-              <option value="80">80%+</option>
+              <option>All</option>
+              <option>Clean</option>
+              <option>Social</option>
+              <option>Quiet</option>
+              <option>Balanced</option>
+            </select>
+          </div>
+
+          <div className="filter-select-group">
+            <label>Min Compatibility</label>
+            <select
+              value={minMatch}
+              onChange={(e) => setMinMatch(e.target.value)}
+            >
+              <option value="0">Any %</option>
               <option value="85">85%+</option>
               <option value="90">90%+</option>
               <option value="95">95%+</option>
             </select>
           </div>
 
-          <button
-            type="button"
-            className="advanced-filter"
-          >
-            <span>☷</span>
-            More filters
-          </button>
-
+          <div className="filter-select-group">
+            <label>Sort By</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="match">Highest Match</option>
+              <option value="age">Age (Youngest)</option>
+            </select>
+          </div>
         </div>
       </section>
 
-      {/* Results */}
-      <section className="discover-results">
-
-        <div className="results-heading">
-          <div>
-            <h2>Recommended for you</h2>
-            <p>
-              Based on your profile and preferences
-            </p>
-          </div>
-
-          <select className="sort-select" defaultValue="match">
-            <option value="match">
-              Best Match
-            </option>
-
-            <option value="recent">
-              Recently Active
-            </option>
-
-            <option value="location">
-              Closest Location
-            </option>
-          </select>
-        </div>
-
+      {/* Roommates Grid */}
+      <section className="discover-results-area">
         {filteredRoommates.length > 0 ? (
-          <div className="discover-grid">
+          <div className="discover-cards-grid">
             {filteredRoommates.map((roommate) => (
               <RoommateCard
                 key={roommate.id}
                 roommate={roommate}
+                isSaved={savedIds.has(String(roommate.id))}
+                onToggleSave={handleToggleSave}
+                onViewProfile={(r) => setSelectedRoommate(r)}
               />
             ))}
           </div>
         ) : (
-          <div className="empty-discover">
-            <div className="empty-icon">⌕</div>
-
-            <h3>No roommates found</h3>
-
-            <p>
-              Try changing your search or filters to find more
-              people.
-            </p>
-
+          <div className="discover-empty-state">
+            <div className="empty-icon-circle">⌕</div>
+            <h3>No roommates found matching your filters</h3>
+            <p>Try clearing your search terms or lowering the minimum match threshold.</p>
             <button
               type="button"
+              className="btn-reset-filters"
               onClick={() => {
                 setSearch("");
                 setLocation("All locations");
+                setLifestyle("All");
                 setMinMatch(0);
               }}
             >
-              Clear filters
+              Reset Filters
             </button>
           </div>
         )}
-
       </section>
+
+      {/* Detail Modal */}
+      {selectedRoommate && (
+        <RoommateModal
+          roommate={selectedRoommate}
+          isSaved={savedIds.has(String(selectedRoommate.id))}
+          onToggleSave={handleToggleSave}
+          onClose={() => setSelectedRoommate(null)}
+        />
+      )}
     </div>
   );
 }
