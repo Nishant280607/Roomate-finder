@@ -2,6 +2,12 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { profileService, DEFAULT_PROFILE } from "../services/profileService";
 
+const DEMO_USER = {
+  id: "demo-user-123",
+  email: "alex.morgan@roomiefinder.com",
+  user_metadata: { full_name: "Alex Morgan" },
+};
+
 const AuthContext = createContext({
   user: null,
   session: null,
@@ -10,6 +16,7 @@ const AuthContext = createContext({
   login: async () => {},
   signup: async () => {},
   logout: async () => {},
+  loginAsDemo: () => {},
   updateProfile: async () => {},
   changePassword: async () => {},
   refreshProfile: async () => {},
@@ -22,7 +29,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   async function loadUserProfile(userId) {
-    if (!userId) {
+    if (!userId || userId === "demo-user-123") {
       setProfile(DEFAULT_PROFILE);
       return;
     }
@@ -35,6 +42,15 @@ export function AuthProvider({ children }) {
 
     async function initializeAuth() {
       try {
+        // Check if user previously signed in with demo account
+        const savedDemo = localStorage.getItem("roomie_demo_active");
+        if (savedDemo === "true") {
+          setUser(DEMO_USER);
+          setProfile(DEFAULT_PROFILE);
+          setLoading(false);
+          return;
+        }
+
         const {
           data: { session: initialSession },
         } = await supabase.auth.getSession();
@@ -63,6 +79,9 @@ export function AuthProvider({ children }) {
     } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
       if (!mounted) return;
 
+      const savedDemo = localStorage.getItem("roomie_demo_active");
+      if (savedDemo === "true") return;
+
       setSession(currentSession);
       const currentUser = currentSession?.user ?? null;
       setUser(currentUser);
@@ -82,7 +101,14 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  function loginAsDemo() {
+    localStorage.setItem("roomie_demo_active", "true");
+    setUser(DEMO_USER);
+    setProfile(DEFAULT_PROFILE);
+  }
+
   async function login(email, password) {
+    localStorage.removeItem("roomie_demo_active");
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -100,6 +126,7 @@ export function AuthProvider({ children }) {
   }
 
   async function signup({ name, email, password }) {
+    localStorage.removeItem("roomie_demo_active");
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -113,13 +140,10 @@ export function AuthProvider({ children }) {
     if (error) throw error;
 
     if (data?.user) {
-      // Upsert profile in Supabase profiles table
       try {
-        await profileService.createProfile(data.user.id, {
-          name,
-        });
+        await profileService.createProfile(data.user.id, { name });
       } catch (profileErr) {
-        console.warn("Profile creation during signup notice:", profileErr);
+        console.warn("Profile creation notice:", profileErr);
       }
     }
 
@@ -127,6 +151,7 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
+    localStorage.removeItem("roomie_demo_active");
     try {
       await supabase.auth.signOut();
     } catch (err) {
@@ -140,12 +165,20 @@ export function AuthProvider({ children }) {
 
   async function updateProfile(updates) {
     if (!user) return null;
+    if (user.id === "demo-user-123") {
+      const updated = { ...profile, ...updates };
+      setProfile(updated);
+      return updated;
+    }
     const updated = await profileService.updateProfile(user.id, updates);
     setProfile(updated);
     return updated;
   }
 
   async function changePassword(newPassword) {
+    if (user?.id === "demo-user-123") {
+      return { success: true };
+    }
     const { data, error } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -167,6 +200,7 @@ export function AuthProvider({ children }) {
     login,
     signup,
     logout,
+    loginAsDemo,
     updateProfile,
     changePassword,
     refreshProfile,

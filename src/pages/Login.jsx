@@ -6,7 +6,7 @@ import "./Auth.css";
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, loginAsDemo } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -16,6 +16,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showConfirmHelp, setShowConfirmHelp] = useState(false);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -28,9 +29,10 @@ function Login() {
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+    setShowConfirmHelp(false);
 
     if (!formData.email || !formData.password) {
-      setError("Please fill in both email and password.");
+      setError("Please enter both email and password.");
       return;
     }
 
@@ -42,14 +44,23 @@ function Login() {
       navigate(destination, { replace: true });
     } catch (err) {
       console.warn("Login failed:", err);
-      if (err.message.includes("Invalid login credentials")) {
-        setError("Invalid email or password. Please try again or create an account.");
+      const msg = err.message || "";
+      if (msg.toLowerCase().includes("email not confirmed")) {
+        setShowConfirmHelp(true);
+        setError("Email not confirmed yet by Supabase. You can bypass this with Demo Sign In below, or disable 'Confirm email' in Supabase Auth settings.");
+      } else if (msg.includes("Invalid login credentials")) {
+        setError("Invalid email or password. Please check your credentials or create a new account.");
       } else {
-        setError(err.message || "Failed to sign in. Please check your credentials.");
+        setError(msg || "Failed to sign in. Please try again.");
       }
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleInstantDemo() {
+    loginAsDemo();
+    navigate("/dashboard");
   }
 
   return (
@@ -66,6 +77,46 @@ function Login() {
           Log in to continue finding your ideal roommate and living space.
         </p>
 
+        {/* Instant Demo Sign-In Banner */}
+        <div style={{
+          background: "linear-gradient(135deg, #F0EBFF, #E5DBFF)",
+          border: "1px solid #C4B5FD",
+          borderRadius: "12px",
+          padding: "14px",
+          marginBottom: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "10px"
+        }}>
+          <div>
+            <strong style={{ display: "block", fontSize: "0.88rem", color: "#5F3DC4" }}>
+              ⚡ Instant Recruiter / Demo Access
+            </strong>
+            <small style={{ fontSize: "0.78rem", color: "#77748A" }}>
+              Skip email verification and explore the app immediately
+            </small>
+          </div>
+          <button
+            type="button"
+            onClick={handleInstantDemo}
+            style={{
+              background: "#7048E8",
+              color: "#FFFFFF",
+              fontWeight: "700",
+              fontSize: "0.82rem",
+              padding: "8px 14px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              boxShadow: "0 2px 8px rgba(112, 72, 232, 0.3)"
+            }}
+          >
+            Demo Sign In →
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="auth-field">
             <label htmlFor="email">Email address</label>
@@ -74,7 +125,7 @@ function Login() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="alex@example.com"
+                placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -90,7 +141,7 @@ function Login() {
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -107,62 +158,40 @@ function Login() {
             </div>
           </div>
 
-          <div className="login-options">
-            <label className="remember-me">
-              <input type="checkbox" defaultChecked />
-              <span>Remember me</span>
-            </label>
-            <button
-              type="button"
-              className="forgot-password"
-              onClick={() => setError("Enter your registered email and we will send reset instructions.")}
-            >
-              Forgot password?
-            </button>
-          </div>
-
-          {error && <div className="auth-error">{error}</div>}
+          {error && (
+            <div className="auth-error" style={{ lineHeight: "1.4" }}>
+              {error}
+              {showConfirmHelp && (
+                <div style={{ marginTop: "10px" }}>
+                  <button
+                    type="button"
+                    onClick={handleInstantDemo}
+                    style={{
+                      background: "#059669",
+                      color: "#FFFFFF",
+                      fontWeight: "700",
+                      fontSize: "0.82rem",
+                      padding: "6px 12px",
+                      borderRadius: "6px",
+                      border: "none",
+                      cursor: "pointer",
+                      width: "100%"
+                    }}
+                  >
+                    Click Here: Continue with Demo Account Instead
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <button className="auth-button" type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Sign In →"}
           </button>
-
-          <div className="demo-account-box">
-            <p>Looking to explore the platform?</p>
-            <button
-              type="button"
-              className="btn-demo-fill"
-              onClick={() => {
-                setFormData({
-                  email: "demo.roomie@example.com",
-                  password: "Password123!",
-                });
-              }}
-            >
-              Pre-fill Demo Credentials
-            </button>
-          </div>
         </form>
-
-        <div className="auth-divider">
-          <span>or continue with</span>
-        </div>
-
-        <button
-          className="google-button"
-          type="button"
-          onClick={() => setError("Google OAuth can be enabled directly in your Supabase Auth provider settings.")}
-        >
-          <span className="google-icon">G</span>
-          Continue with Google
-        </button>
 
         <p className="auth-footer">
           Don't have an account? <Link to="/register">Create an account</Link>
-        </p>
-
-        <p className="auth-terms">
-          By signing in, you agree to our <span>Terms of Service</span> and <span>Privacy Policy</span>.
         </p>
       </div>
     </div>
