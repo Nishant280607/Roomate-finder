@@ -1,0 +1,44 @@
+.message-row {
+  display: flex;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.message-row.me {
+  justify-content: flex-end;
+}
+
+.message-row.them {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 65%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #eeece7;
+  color: #292725;
+}
+
+.message-row.them .message-bubble {
+  border-bottom-left-radius: 4px;
+}
+
+.message-row.me .message-bubble {
+  background: #171717;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.message-bubble span {
+  display: block;
+  margin-top: 5px;
+  font-size: 8px;
+  opacity: 0.55;
+}

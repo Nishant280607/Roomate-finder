@@ -1,0 +1,312 @@
+.dashboard-view {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.dash-hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-lg, 20px);
+  padding: 32px 36px;
+  box-shadow: var(--shadow-sm);
+}
+
+.dash-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--primary, #7048E8);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.dash-greeting {
+  font-size: 2.2rem;
+  color: var(--dark, #11101A);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.wave-hand {
+  display: inline-block;
+  animation: floatGentle 3s ease-in-out infinite;
+}
+
+.dash-subtext {
+  font-size: 1rem;
+  color: var(--muted, #77748A);
+}
+
+.dash-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-dash-primary {
+  background: var(--primary, #7048E8);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: var(--radius-full, 9999px);
+  box-shadow: 0 4px 14px rgba(112, 72, 232, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-dash-primary:hover {
+  background: var(--primary-hover, #5F3DC4);
+  transform: translateY(-1px);
+}
+
+.btn-dash-secondary {
+  background: var(--bg-main, #F8F7FF);
+  color: var(--dark, #11101A);
+  border: 1px solid var(--border, #ECEAF3);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 22px;
+  border-radius: var(--radius-full, 9999px);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-dash-secondary:hover {
+  border-color: var(--border-focus, #C4B5FD);
+  background: #FFFFFF;
+}
+
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.dash-quick-actions-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-md, 14px);
+  padding: 16px 20px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--dark, #11101A);
+  box-shadow: var(--shadow-xs);
+  transition: all 0.2s ease;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary, #7048E8);
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-card-hover, #FCFBFF);
+}
+
+.action-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--primary-light, #F0EBFF);
+  color: var(--primary, #7048E8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+}
+
+.dash-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.dash-section-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--primary, #7048E8);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.dash-section-header h2 {
+  font-size: 1.6rem;
+  color: var(--dark, #11101A);
+  margin-bottom: 4px;
+}
+
+.dash-section-header p {
+  font-size: 0.92rem;
+  color: var(--muted, #77748A);
+}
+
+.dash-view-all-link {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary, #7048E8);
+  white-space: nowrap;
+}
+
+.dash-view-all-link:hover {
+  text-decoration: underline;
+}
+
+.dash-matches-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.dash-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+}
+
+.dash-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-lg, 20px);
+  padding: 28px;
+  box-shadow: var(--shadow-xs);
+}
+
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.dash-card-header h3 {
+  font-size: 1.25rem;
+  color: var(--dark, #11101A);
+}
+
+.card-header-link {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary, #7048E8);
+}
+
+.activity-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.strength-percentage {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--primary, #7048E8);
+}
+
+.strength-progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--bg-main, #F8F7FF);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.strength-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full, 9999px);
+  background: linear-gradient(90deg, #7048E8, #9B72FA);
+  transition: width 0.5s ease;
+}
+
+.strength-tips {
+  font-size: 0.88rem;
+  color: var(--muted, #77748A);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.strength-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.checklist-item {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.checklist-item.done {
+  color: #059669;
+}
+
+.checklist-item.pending {
+  color: var(--muted, #77748A);
+}
+
+.btn-strength-cta {
+  display: block;
+  text-align: center;
+  background: var(--bg-main, #F8F7FF);
+  color: var(--primary, #7048E8);
+  border: 1px solid var(--border, #ECEAF3);
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 12px;
+  border-radius: var(--radius-sm, 8px);
+  transition: all 0.2s ease;
+}
+
+.btn-strength-cta:hover {
+  background: var(--primary-light, #F0EBFF);
+  border-color: var(--border-focus, #C4B5FD);
+}
+
+@media (max-width: 1200px) {
+  .dash-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dash-quick-actions-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dash-matches-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .dash-hero-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dash-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dash-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .dash-quick-actions-bar {
+    grid-template-columns: 1fr;
+  }
+  .dash-matches-grid {
+    grid-template-columns: 1fr;
+  }
+}

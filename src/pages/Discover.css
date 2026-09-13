@@ -1,0 +1,219 @@
+.discover-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.discover-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-lg, 20px);
+  padding: 30px 36px;
+  box-shadow: var(--shadow-sm);
+}
+
+.discover-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--primary, #7048E8);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.discover-header-card h1 {
+  font-size: 2rem;
+  color: var(--dark, #11101A);
+  margin-bottom: 4px;
+}
+
+.discover-header-card p {
+  font-size: 0.95rem;
+  color: var(--muted, #77748A);
+}
+
+.discover-count-badge {
+  background: var(--primary-light, #F0EBFF);
+  border: 1px solid var(--border-focus, #C4B5FD);
+  padding: 12px 24px;
+  border-radius: var(--radius-md, 14px);
+  text-align: center;
+}
+
+.discover-count-badge strong {
+  display: block;
+  font-size: 1.6rem;
+  color: var(--primary, #7048E8);
+  line-height: 1.1;
+}
+
+.discover-count-badge span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted, #77748A);
+}
+
+.discover-filters-panel {
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-lg, 20px);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.discover-search-input-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-main, #F8F7FF);
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-md, 14px);
+  padding: 12px 18px;
+  transition: all 0.2s ease;
+}
+
+.discover-search-input-box:focus-within {
+  border-color: var(--primary, #7048E8);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(112, 72, 232, 0.12);
+}
+
+.discover-search-input-box .search-icon {
+  font-size: 1.25rem;
+  color: var(--muted-light, #9E9BB2);
+}
+
+.discover-search-input-box input {
+  border: none;
+  background: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.95rem;
+  color: var(--dark, #11101A);
+}
+
+.clear-search-btn {
+  font-size: 0.9rem;
+  color: var(--muted, #77748A);
+  padding: 4px;
+}
+
+.discover-filter-controls {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.filter-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-select-group label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted, #77748A);
+}
+
+.filter-select-group select {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--border, #ECEAF3);
+  background: var(--bg-main, #F8F7FF);
+  color: var(--dark, #11101A);
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.filter-select-group select:focus {
+  border-color: var(--primary, #7048E8);
+  background: #FFFFFF;
+}
+
+.discover-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.discover-empty-state {
+  background: #FFFFFF;
+  border: 1px dashed var(--border-focus, #C4B5FD);
+  border-radius: var(--radius-lg, 20px);
+  padding: 60px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--primary-light, #F0EBFF);
+  color: var(--primary, #7048E8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+.discover-empty-state h3 {
+  font-size: 1.25rem;
+  color: var(--dark, #11101A);
+}
+
+.discover-empty-state p {
+  font-size: 0.92rem;
+  color: var(--muted, #77748A);
+  max-width: 420px;
+}
+
+.btn-reset-filters {
+  margin-top: 8px;
+  background: var(--primary, #7048E8);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 10px 22px;
+  border-radius: var(--radius-full, 9999px);
+  transition: all 0.2s ease;
+}
+
+.btn-reset-filters:hover {
+  background: var(--primary-hover, #5F3DC4);
+}
+
+@media (max-width: 1100px) {
+  .discover-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .discover-filter-controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .discover-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .discover-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .discover-filter-controls {
+    grid-template-columns: 1fr;
+  }
+}

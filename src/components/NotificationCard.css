@@ -1,0 +1,103 @@
+.notification-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-md, 14px);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.notification-card:hover {
+  border-color: var(--border-focus, #C4B5FD);
+  box-shadow: 0 4px 14px rgba(17, 16, 26, 0.04);
+}
+
+.notification-card.unread {
+  background: var(--bg-card-hover, #FCFBFF);
+  border-left: 4px solid var(--primary, #7048E8);
+}
+
+.notification-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.notification-card-icon.match {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.notification-card-icon.message {
+  background: var(--primary-light, #F0EBFF);
+  color: var(--primary, #7048E8);
+}
+
+.notification-card-icon.profile {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.notification-card-icon.system {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.notification-card-info {
+  flex: 1;
+}
+
+.notification-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.notification-card-title-row h3 {
+  font-size: 0.95rem;
+  color: var(--dark, #11101A);
+}
+
+.notification-unread-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary, #7048E8);
+}
+
+.notification-card-info p {
+  font-size: 0.88rem;
+  color: var(--muted, #77748A);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.notification-card-time {
+  font-size: 0.75rem;
+  color: var(--muted-light, #9E9BB2);
+}
+
+.btn-mark-read {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary, #7048E8);
+  background: var(--primary-light, #F0EBFF);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm, 8px);
+  align-self: center;
+  transition: all 0.2s ease;
+}
+
+.btn-mark-read:hover {
+  background: var(--primary, #7048E8);
+  color: #FFFFFF;
+}

@@ -1,0 +1,126 @@
+.saved-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.saved-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFFFFF;
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-lg, 20px);
+  padding: 30px 36px;
+  box-shadow: var(--shadow-sm);
+}
+
+.saved-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--primary, #7048E8);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.saved-header-card h1 {
+  font-size: 2rem;
+  color: var(--dark, #11101A);
+  margin-bottom: 4px;
+}
+
+.saved-header-card p {
+  font-size: 0.95rem;
+  color: var(--muted, #77748A);
+}
+
+.saved-count-pill {
+  background: var(--primary-light, #F0EBFF);
+  border: 1px solid var(--border-focus, #C4B5FD);
+  padding: 12px 24px;
+  border-radius: var(--radius-md, 14px);
+  text-align: center;
+}
+
+.saved-count-pill strong {
+  display: block;
+  font-size: 1.6rem;
+  color: var(--primary, #7048E8);
+  line-height: 1.1;
+}
+
+.saved-count-pill span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted, #77748A);
+}
+
+.saved-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.saved-empty-box {
+  background: #FFFFFF;
+  border: 1px dashed var(--border-focus, #C4B5FD);
+  border-radius: var(--radius-lg, 20px);
+  padding: 70px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.empty-bookmark-icon {
+  font-size: 2.8rem;
+  color: var(--primary, #7048E8);
+  margin-bottom: 4px;
+}
+
+.saved-empty-box h2 {
+  font-size: 1.4rem;
+  color: var(--dark, #11101A);
+}
+
+.saved-empty-box p {
+  font-size: 0.95rem;
+  color: var(--muted, #77748A);
+  max-width: 440px;
+}
+
+.btn-empty-discover {
+  margin-top: 10px;
+  background: var(--primary, #7048E8);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 28px;
+  border-radius: var(--radius-full, 9999px);
+  box-shadow: 0 4px 14px rgba(112, 72, 232, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-empty-discover:hover {
+  background: var(--primary-hover, #5F3DC4);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1100px) {
+  .saved-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .saved-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .saved-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}

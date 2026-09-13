@@ -1,0 +1,235 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 16, 26, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.roommate-modal {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg, 20px);
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(17, 16, 26, 0.25);
+  animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--dark, #11101A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: #FFFFFF;
+  transform: scale(1.08);
+}
+
+.modal-header {
+  position: relative;
+  padding: 24px 28px 16px;
+}
+
+.modal-cover-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: linear-gradient(135deg, #7048E8 0%, #9B72FA 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-profile-top {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 24px;
+  margin-bottom: 14px;
+}
+
+.modal-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  border: 4px solid #FFFFFF;
+  object-fit: cover;
+  box-shadow: var(--shadow-md);
+}
+
+.modal-match-badge {
+  background: #ECFDF5;
+  color: #059669;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 9999px);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-heading {
+  margin-top: 8px;
+}
+
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title-row h2 {
+  font-size: 1.5rem;
+  color: var(--dark, #11101A);
+}
+
+.modal-save-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--bg-main, #F8F7FF);
+  border: 1px solid var(--border, #ECEAF3);
+  color: var(--muted, #77748A);
+  transition: all 0.2s ease;
+}
+
+.modal-save-btn.saved {
+  background: #FEE2E2;
+  color: #EF4444;
+  border-color: #FECACA;
+}
+
+.modal-occupation {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dark, #11101A);
+  margin-top: 4px;
+}
+
+.modal-location {
+  font-size: 0.85rem;
+  color: var(--muted, #77748A);
+  margin-top: 2px;
+}
+
+.modal-body {
+  padding: 16px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-section h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: var(--dark, #11101A);
+}
+
+.modal-bio {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--muted, #77748A);
+}
+
+.modal-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-main, #F8F7FF);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--border, #ECEAF3);
+}
+
+.detail-icon {
+  font-size: 1.25rem;
+}
+
+.detail-item small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted, #77748A);
+}
+
+.detail-item strong {
+  font-size: 0.88rem;
+  color: var(--dark, #11101A);
+}
+
+.modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modal-tag {
+  background: var(--primary-light, #F0EBFF);
+  color: var(--primary, #7048E8);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+}
+
+.modal-footer {
+  padding: 16px 28px 24px;
+  border-top: 1px solid var(--border, #ECEAF3);
+  display: flex;
+  gap: 12px;
+}
+
+.btn-modal-message {
+  flex: 1;
+  background: var(--primary, #7048E8);
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: var(--radius-sm, 8px);
+  box-shadow: 0 4px 14px rgba(112, 72, 232, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-modal-message:hover {
+  background: var(--primary-hover, #5F3DC4);
+}
+
+.btn-modal-close {
+  padding: 12px 20px;
+  background: var(--bg-main, #F8F7FF);
+  border: 1px solid var(--border, #ECEAF3);
+  border-radius: var(--radius-sm, 8px);
+  font-weight: 600;
+  color: var(--dark, #11101A);
+}
