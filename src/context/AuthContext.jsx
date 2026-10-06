@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SUPABASE_KEY, SUPABASE_URL, supabase } from "../lib/supabase";
-import { GOOGLE_OFF_MESSAGE } from "../lib/authErrors";
+import { friendly, GOOGLE_OFF_MESSAGE, isAlreadyRegistered, isInvalidCredentials, MESSAGES } from "../lib/authErrors";
 
 const DEMO_FLAG = "rf-demo";
 const DEMO_USER = { id: "me", email: "guest@demo.local", app_metadata: { provider: "demo" }, user_metadata: {} };
@@ -107,12 +107,35 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   }, []);
 
-  const signInWithEmail = useCallback(async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+  /** "none" | "password" | "google" | "both", or null if it can't tell. */
+  const emailStatus = useCallback(async (email) => {
+    try {
+      const { data, error } = await supabase.rpc("rf_email_status", { p_email: email });
+      return error ? null : data;
+    } catch {
+      return null;
+    }
   }, []);
 
+  const signInWithEmail = useCallback(
+    async (email, password) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error) return;
+      if (isInvalidCredentials(error)) {
+        const status = await emailStatus(email);
+        if (status === "none") throw friendly(MESSAGES.noAccount);
+        if (status === "google") throw friendly(MESSAGES.usesGoogle);
+        if (status) throw friendly(MESSAGES.wrongPassword);
+      }
+      throw error;
+    },
+    [emailStatus],
+  );
+
   const signUpWithEmail = useCallback(async ({ name, email, password }) => {
+    const status = await emailStatus(email);
+    if (status === "google") throw friendly(MESSAGES.alreadyRegisteredGoogle);
+    if (status === "password" || status === "both") throw friendly(MESSAGES.alreadyRegistered);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -121,18 +144,25 @@ export function AuthProvider({ children }) {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-    if (error) throw error;
+    if (error) throw isAlreadyRegistered(error) ? friendly(MESSAGES.alreadyRegistered) : error;
     // Supabase hides "already registered" by returning a user with no identities.
-    if (data.user && data.user.identities?.length === 0) {
-      throw new Error("User already registered");
-    }
+    if (data.user && data.user.identities?.length === 0) throw friendly(MESSAGES.alreadyRegistered);
     return { needsConfirmation: !data.session };
-  }, []);
+  }, [emailStatus]);
 
   const sendPasswordReset = useCallback(async (email) => {
+    const status = await emailStatus(email);
+    if (status === "none") throw friendly(MESSAGES.noAccount);
+    if (status === "google") throw friendly(MESSAGES.googleNoPassword);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
+    if (error) throw error;
+  }, [emailStatus]);
+
+  /** Checks the code from a password-reset email. On success the person is signed in. */
+  const verifyRecoveryCode = useCallback(async (email, token) => {
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: "recovery" });
     if (error) throw error;
   }, []);
 
@@ -180,11 +210,12 @@ export function AuthProvider({ children }) {
       signInWithEmail,
       signUpWithEmail,
       sendPasswordReset,
+      verifyRecoveryCode,
       updatePassword,
       startDemo,
       signOut,
     };
-  }, [demo, session, loading, recovery, holding, hold, release, googleEnabled, signInWithGoogle, signInWithEmail, signUpWithEmail, sendPasswordReset, updatePassword, startDemo, signOut]);
+  }, [demo, session, loading, recovery, holding, hold, release, googleEnabled, signInWithGoogle, signInWithEmail, signUpWithEmail, sendPasswordReset, verifyRecoveryCode, updatePassword, startDemo, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

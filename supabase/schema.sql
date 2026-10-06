@@ -196,6 +196,33 @@ $$;
 revoke all on function public.rf_delete_account() from public, anon;
 grant execute on function public.rf_delete_account() to authenticated;
 
+-- Lets the sign-in page give specific messages ("no account with this email",
+-- "incorrect password", "use Google"). Returns none | password | google | both.
+create or replace function public.rf_email_status(p_email text)
+returns text language sql stable security definer set search_path = public, auth as $$
+  with u as (
+    select id, coalesce(encrypted_password, '') <> '' as has_password
+    from auth.users
+    where lower(email) = lower(btrim(p_email))
+    limit 1
+  ),
+  g as (
+    select exists (
+      select 1 from auth.identities i where i.user_id = (select id from u) and i.provider = 'google'
+    ) as has_google
+  )
+  select case
+    when not exists (select 1 from u) then 'none'
+    when (select has_password from u) and (select has_google from g) then 'both'
+    when (select has_password from u) then 'password'
+    when (select has_google from g) then 'google'
+    else 'password'
+  end;
+$$;
+
+revoke all on function public.rf_email_status(text) from public;
+grant execute on function public.rf_email_status(text) to anon, authenticated;
+
 -- Members who signed up before this script ran.
 insert into public.members (id, full_name, avatar_url)
 select

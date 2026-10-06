@@ -4,21 +4,42 @@ import { useToast } from "./ToastContext";
 import { createDemoApi } from "../data/demoApi";
 import { createSupabaseApi } from "../data/supabaseApi";
 import { isMissingSchema } from "../lib/supabase";
+import { MESSAGES } from "../lib/authErrors";
 import { computeMatch, fitsPreference } from "../lib/match";
 import { firstName } from "../lib/format";
 
 const StoreContext = createContext(null);
 const NONE = { state: "none", conn: null };
 
-// Shown on screen, so it never includes technical details. The raw error goes to the console.
-function errorText(error) {
+// Shown on screen: says what failed and why, in plain words. The raw error goes to the console.
+const CHECKS = [
+  [/age/, "Age must be between 16 and 99."],
+  [/rent_order|rent/, "Your minimum rent must be lower than your maximum."],
+  [/bio/, "Your bio can be up to 600 characters."],
+  [/full_name/, "Your name can be up to 80 characters."],
+  [/occupation/, "What you do can be up to 80 characters."],
+  [/body/, "Messages can't be empty or longer than 2,000 characters."],
+  [/note/, "Notes can be up to 300 characters."],
+  [/not_self/, "You can't connect with yourself."],
+];
+
+function errorText(error, fallback = "That didn't work.") {
   const message = String(error?.message || error || "");
-  if (message) console.error("[RoomieFinder]", message);
-  if (/row-level security|permission denied/i.test(message)) return "You can't do that yet. You may need to be connected first.";
-  if (/failed to fetch|network|load failed/i.test(message)) return "Couldn't connect. Check your internet connection and try again.";
-  if (/too large|image/i.test(message) && /photo|image|file/i.test(message)) return "That photo couldn't be uploaded. Try a smaller JPG or PNG.";
-  if (/only message people you're connected with|request is no longer available|isn't an image/i.test(message)) return message;
-  return "Something went wrong. Please try again.";
+  const code = String(error?.code || "");
+  if (message) console.error("[RoomieFinder]", code, message);
+  if (/failed to fetch|networkerror|load failed|network request failed/i.test(message)) return MESSAGES.offline;
+  if (/jwt expired|session.*expired|refresh token/i.test(message) || code === "PGRST301") return "Your session has expired. Please sign in again.";
+  if (/row-level security|permission denied/i.test(message) || code === "42501") return `${fallback} You need to be connected with this person first.`;
+  if (code === "23514" || /violates check constraint/i.test(message)) {
+    const name = message.match(/constraint "([^"]+)"/)?.[1] || "";
+    return CHECKS.find(([pattern]) => pattern.test(name))?.[1] || `${fallback} Some details aren't valid.`;
+  }
+  if (code === "23503") return `${fallback} This person's account no longer exists.`;
+  if (/exceeded the maximum allowed size|payload too large/i.test(message)) return "That photo is too big. Choose a smaller one.";
+  if (/mime type|isn't an image/i.test(message)) return "That file isn't a photo we can use. Choose a JPG or PNG.";
+  if (/could not find the .* column|schema cache/i.test(message)) return `${fallback} This feature isn't available yet.`;
+  if (/only message people you're connected with|request is no longer available/i.test(message)) return message;
+  return `${fallback} Please try again.`;
 }
 
 async function fetchEverything(api) {
@@ -34,7 +55,7 @@ async function fetchEverything(api) {
     return { status: "ready", data: { me, members, connections, saved, messages, activity } };
   } catch (error) {
     if (isMissingSchema(error)) return { status: "needs-setup" };
-    return { status: "error", error: errorText(error) };
+    return { status: "error", error: errorText(error, "We couldn't load your matches.") };
   }
 }
 
@@ -222,13 +243,13 @@ export function StoreProvider({ children }) {
   /* ---------- Actions ---------- */
 
   const run = useCallback(
-    async (fn, successText) => {
+    async (fn, successText, failText) => {
       try {
         const result = await fn();
         if (successText) toast(successText);
         return result;
       } catch (error) {
-        toast.error(errorText(error));
+        toast.error(errorText(error, failText));
         throw error;
       }
     },
@@ -241,7 +262,7 @@ export function StoreProvider({ children }) {
         const row = await api.saveMe(patch);
         setMe(row);
         return row;
-      }, successText),
+      }, successText, "Couldn't save your profile."),
     [api, run],
   );
 
@@ -252,7 +273,7 @@ export function StoreProvider({ children }) {
         const row = await api.saveMe({ avatar_url: url });
         setMe(row);
         return row;
-      }, "Photo updated"),
+      }, "Photo updated", "Couldn't upload your photo."),
     [api, run],
   );
 
@@ -265,6 +286,7 @@ export function StoreProvider({ children }) {
           setConnections((list) => (accept ? list.map((c) => (c.id === conn.id ? row : c)) : list.filter((c) => c.id !== conn.id)));
         },
         accept ? `You're connected with ${name}` : "Request declined",
+        accept ? "Couldn't accept the request." : "Couldn't decline the request.",
       );
     },
     [api, run, memberById],
@@ -278,7 +300,7 @@ export function StoreProvider({ children }) {
         const row = await api.connect(otherId, note || "");
         setConnections((list) => [...list.filter((c) => c.id !== row.id), row]);
         return row;
-      }, `Request sent to ${firstName(memberById.get(otherId)?.full_name)}`);
+      }, `Request sent to ${firstName(memberById.get(otherId)?.full_name)}`, "Couldn't send your request.");
     },
     [api, run, relationTo, memberById, respond],
   );
@@ -288,7 +310,7 @@ export function StoreProvider({ children }) {
       run(async () => {
         await api.removeConnection(conn.id);
         setConnections((list) => list.filter((c) => c.id !== conn.id));
-      }, successText),
+      }, successText, "Couldn't remove that connection."),
     [api, run],
   );
 
@@ -296,7 +318,7 @@ export function StoreProvider({ children }) {
     (memberId) => {
       const on = !saved.includes(memberId);
       setSaved((list) => (on ? [memberId, ...list] : list.filter((id) => id !== memberId)));
-      return run(async () => api.setSaved(memberId, on), on ? "Saved" : "Removed from saved").catch(() => {
+      return run(async () => api.setSaved(memberId, on), on ? "Saved" : "Removed from saved", "Couldn't update your saved list.").catch(() => {
         setSaved((list) => (on ? list.filter((id) => id !== memberId) : [memberId, ...list]));
       });
     },
@@ -327,7 +349,7 @@ export function StoreProvider({ children }) {
         });
       } catch (error) {
         setMessages((list) => list.map((m) => (m.id === temp.id ? { ...m, pending: false, failed: true } : m)));
-        toast.error(errorText(error));
+        toast.error(errorText(error, "Message not sent."));
       }
     },
     [api, me, toast],
@@ -376,7 +398,7 @@ export function StoreProvider({ children }) {
   const sendTyping = useCallback((to) => api?.sendTyping?.(to), [api]);
 
   const deleteAccount = useCallback(async () => {
-    await run(() => api.deleteAccount());
+    await run(() => api.deleteAccount(), null, "Couldn't delete your account.");
     await signOut();
   }, [api, run, signOut]);
 

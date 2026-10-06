@@ -1,5 +1,6 @@
-import { createBrowserRouter, Link, Outlet, RouterProvider } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { useEffect, useRef } from "react";
+import { createBrowserRouter, Link, Outlet, RouterProvider, useLocation, useNavigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { StoreProvider } from "./context/StoreContext";
 import { ToastProvider } from "./context/ToastContext";
 import { AppGate, AppShell, PublicOnly, RequireAuth } from "./components/Shell";
@@ -18,10 +19,29 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import { Privacy, Terms } from "./pages/Legal";
 
+/** A password-reset link can land on any page; send the person to set their new password. */
+function RecoveryRedirect() {
+  const { recovery, holding } = useAuth();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const sent = useRef(false);
+  useEffect(() => {
+    if (!recovery) {
+      sent.current = false;
+      return;
+    }
+    if (holding || sent.current || pathname === "/reset-password") return;
+    sent.current = true;
+    navigate("/reset-password", { replace: true });
+  }, [recovery, holding, pathname, navigate]);
+  return null;
+}
+
 function Providers() {
   return (
     <ToastProvider>
       <AuthProvider>
+        <RecoveryRedirect />
         <Outlet />
       </AuthProvider>
     </ToastProvider>

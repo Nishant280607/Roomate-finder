@@ -272,6 +272,18 @@
   color: var(--ink-2);
 }
 
+.code-input {
+  font-size: 1.4rem;
+  letter-spacing: 0.35em;
+  font-weight: 700;
+}
+
+.text-link:disabled {
+  color: var(--ink-3);
+  text-decoration: none;
+  cursor: default;
+}
+
 .field-row-between {
   display: flex;
   align-items: baseline;
