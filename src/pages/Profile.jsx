@@ -1,471 +1,124 @@
-import { useState } from "react";
-import "./Profile.css";
+import { useMemo, useState } from "react";
+import { Link, useBlocker } from "react-router-dom";
+import { Eye } from "lucide-react";
+import { useStore } from "../context/StoreContext";
+import { AboutFields, BasicsFields, DailyLifeFields, PhotoField, SearchFields } from "../components/ProfileFields";
+import { ConfirmDialog } from "../components/Bits";
+import { validateProfile } from "../lib/validate";
+import { profileGaps } from "../lib/match";
+import { PROFILE_FIELDS } from "../lib/options";
 
-function Profile() {
-  const [editing, setEditing] = useState(false);
+const SECTIONS = [
+  { id: "basics", title: "About you", Fields: BasicsFields },
+  { id: "search", title: "What you're looking for", Fields: SearchFields },
+  { id: "daily", title: "Day to day", Fields: DailyLifeFields },
+  { id: "about", title: "Interests and bio", Fields: AboutFields },
+];
 
-  const [profile, setProfile] = useState({
-    name: "Alex Morgan",
-    age: 24,
-    location: "Brooklyn, New York",
-    occupation: "Software Developer",
-    bio: "Easy-going, clean and respectful person looking for a comfortable place with a friendly roommate. I enjoy coding, coffee, fitness and exploring new places.",
-    budget: "$900 - $1,300",
-    moveIn: "October 2026",
-    cleanliness: "Very Clean",
-    socialLevel: "Moderately Social",
-    sleepSchedule: "Night Owl",
-  });
+const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
-  const [interests, setInterests] = useState([
-    "Coding",
-    "Coffee",
-    "Gym",
-    "Travel",
-    "Movies",
-    "Gaming",
-  ]);
+export default function Profile() {
+  const { me, saveProfile, uploadAvatar } = useStore();
+  const [draft, setDraft] = useState(me);
+  const [errors, setErrors] = useState({});
+  const [busy, setBusy] = useState(false);
 
-  function handleChange(event) {
-    const { name, value } = event.target;
+  const dirty = useMemo(() => PROFILE_FIELDS.some((k) => k !== "avatar_url" && !same(draft[k], me[k])), [draft, me]);
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => dirty && currentLocation.pathname !== nextLocation.pathname);
+  const gaps = profileGaps(draft);
 
-    setProfile((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
+  const set = (patch) => {
+    setDraft((d) => ({ ...d, ...patch }));
+    setErrors((e) => {
+      const next = { ...e };
+      for (const k of Object.keys(patch)) delete next[k];
+      if ("rent_min" in patch || "rent_max" in patch) delete next.rent;
+      return next;
+    });
+  };
+
+  async function save(e) {
+    e?.preventDefault();
+    const problems = validateProfile(draft);
+    setErrors(problems);
+    if (Object.keys(problems).length) {
+      document.querySelector("[aria-invalid='true']")?.focus();
+      return false;
+    }
+    setBusy(true);
+    try {
+      const row = await saveProfile(draft, "Profile saved");
+      setDraft(row);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setBusy(false);
+    }
   }
-
-  function toggleInterest(interest) {
-    setInterests((previous) =>
-      previous.includes(interest)
-        ? previous.filter((item) => item !== interest)
-        : [...previous, interest]
-    );
-  }
-
-  function saveProfile() {
-    setEditing(false);
-  }
-
-  const availableInterests = [
-    "Coding",
-    "Coffee",
-    "Gym",
-    "Travel",
-    "Movies",
-    "Gaming",
-    "Cooking",
-    "Music",
-    "Reading",
-    "Photography",
-  ];
 
   return (
-    <div className="profile-page">
-
-      {/* Header */}
-      <section className="profile-page-header">
+    <div className="page page-narrow">
+      <header className="page-head page-head-row">
         <div>
-          <span className="profile-eyebrow">
-            YOUR PERSONAL SPACE
-          </span>
-
-          <h1>My Profile</h1>
-
-          <p>
-            Tell potential roommates a little more about you.
-          </p>
+          <h1 className="h-page">Your profile</h1>
+          <p className="lede">{gaps.percent}% complete. Everything here is visible to people in Discover, except your email.</p>
         </div>
+        <Link to={`/people/${me.id}`} className="btn btn-ghost btn-sm">
+          <Eye size={16} aria-hidden /> Preview
+        </Link>
+      </header>
 
-        {!editing ? (
-          <button
-            type="button"
-            className="edit-profile-button"
-            onClick={() => setEditing(true)}
-          >
-            ✎ Edit Profile
-          </button>
-        ) : (
-          <div className="profile-header-actions">
-            <button
-              type="button"
-              className="cancel-profile-button"
-              onClick={() => setEditing(false)}
-            >
-              Cancel
-            </button>
+      <form onSubmit={save} noValidate className="profile-form">
+        <section className="panel panel-pad">
+          <PhotoField
+            draft={draft}
+            onUpload={async (file) => {
+              const row = await uploadAvatar(file);
+              setDraft((d) => ({ ...d, avatar_url: row.avatar_url }));
+            }}
+          />
+        </section>
+        {SECTIONS.map(({ id, title, Fields }) => (
+          <section key={id} className="panel panel-pad" aria-labelledby={`sec-${id}`}>
+            <h2 id={`sec-${id}`} className="h-section section-title">
+              {title}
+            </h2>
+            <Fields draft={draft} set={set} errors={errors} />
+          </section>
+        ))}
 
-            <button
-              type="button"
-              className="save-profile-button"
-              onClick={saveProfile}
-            >
-              Save Changes
-            </button>
-          </div>
-        )}
-      </section>
-
-      {/* Main profile layout */}
-      <div className="profile-layout">
-
-        {/* Left column */}
-        <aside className="profile-sidebar">
-
-          <div className="profile-card profile-main-card">
-
-            <div className="profile-photo-wrapper">
-              <img
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80"
-                alt="Profile"
-              />
-
-              <span className="profile-online-dot"></span>
-
-              {editing && (
-                <button
-                  type="button"
-                  className="change-photo-button"
-                >
-                  📷
-                </button>
-              )}
-            </div>
-
-            {!editing ? (
-              <>
-                <h2>{profile.name}</h2>
-
-                <p className="profile-role">
-                  {profile.occupation}
-                </p>
-
-                <div className="profile-location">
-                  <span>⌖</span>
-                  {profile.location}
-                </div>
-              </>
-            ) : (
-              <div className="profile-edit-name">
-                <input
-                  name="name"
-                  value={profile.name}
-                  onChange={handleChange}
-                  placeholder="Your name"
-                />
-
-                <input
-                  name="occupation"
-                  value={profile.occupation}
-                  onChange={handleChange}
-                  placeholder="Occupation"
-                />
-              </div>
+        <div className={`savebar ${dirty ? "is-dirty" : ""}`}>
+          <span>{dirty ? "You have unsaved changes" : "All changes saved"}</span>
+          <div className="action-row">
+            {dirty && (
+              <button type="button" className="btn btn-quiet" onClick={() => { setDraft(me); setErrors({}); }}>
+                Discard
+              </button>
             )}
-
-            <div className="profile-match-score">
-              <div className="match-score-circle">
-                <strong>92%</strong>
-              </div>
-
-              <div>
-                <strong>Great Match</strong>
-                <span>Profile compatibility</span>
-              </div>
-            </div>
-
-            <div className="profile-completion">
-              <div className="completion-heading">
-                <span>Profile completion</span>
-                <strong>86%</strong>
-              </div>
-
-              <div className="completion-bar">
-                <span></span>
-              </div>
-
-              <p>
-                Complete your profile to get better matches.
-              </p>
-            </div>
-
+            <button type="submit" className="btn btn-primary" disabled={!dirty || busy}>
+              {busy && <span className="spinner" aria-hidden />} Save changes
+            </button>
           </div>
+        </div>
+      </form>
 
-          {/* Quick stats */}
-          <div className="profile-card quick-stats">
-
-            <h3>Quick Details</h3>
-
-            <div className="quick-detail">
-              <span>🎂</span>
-              <div>
-                <small>Age</small>
-                <strong>{profile.age} years old</strong>
-              </div>
-            </div>
-
-            <div className="quick-detail">
-              <span>💰</span>
-              <div>
-                <small>Monthly Budget</small>
-                <strong>{profile.budget}</strong>
-              </div>
-            </div>
-
-            <div className="quick-detail">
-              <span>📦</span>
-              <div>
-                <small>Move-in</small>
-                <strong>{profile.moveIn}</strong>
-              </div>
-            </div>
-
-          </div>
-
-        </aside>
-
-        {/* Right column */}
-        <main className="profile-content">
-
-          {/* About */}
-          <section className="profile-card profile-section">
-
-            <div className="section-title">
-              <div>
-                <h2>About Me</h2>
-                <p>Introduce yourself to potential roommates.</p>
-              </div>
-
-              <span>01</span>
-            </div>
-
-            {editing ? (
-              <textarea
-                name="bio"
-                value={profile.bio}
-                onChange={handleChange}
-                rows="5"
-              />
-            ) : (
-              <p className="profile-bio">
-                {profile.bio}
-              </p>
-            )}
-
-          </section>
-
-          {/* Lifestyle */}
-          <section className="profile-card profile-section">
-
-            <div className="section-title">
-              <div>
-                <h2>Lifestyle</h2>
-                <p>
-                  These preferences help us find compatible
-                  roommates.
-                </p>
-              </div>
-
-              <span>02</span>
-            </div>
-
-            <div className="lifestyle-grid">
-
-              <div className="lifestyle-item">
-                <span className="lifestyle-icon">🧹</span>
-
-                <div>
-                  <small>Cleanliness</small>
-
-                  {editing ? (
-                    <select
-                      name="cleanliness"
-                      value={profile.cleanliness}
-                      onChange={handleChange}
-                    >
-                      <option>Very Clean</option>
-                      <option>Clean</option>
-                      <option>Relaxed</option>
-                    </select>
-                  ) : (
-                    <strong>{profile.cleanliness}</strong>
-                  )}
-                </div>
-              </div>
-
-              <div className="lifestyle-item">
-                <span className="lifestyle-icon">🗣️</span>
-
-                <div>
-                  <small>Social Level</small>
-
-                  {editing ? (
-                    <select
-                      name="socialLevel"
-                      value={profile.socialLevel}
-                      onChange={handleChange}
-                    >
-                      <option>Very Social</option>
-                      <option>Moderately Social</option>
-                      <option>Quiet</option>
-                    </select>
-                  ) : (
-                    <strong>{profile.socialLevel}</strong>
-                  )}
-                </div>
-              </div>
-
-              <div className="lifestyle-item">
-                <span className="lifestyle-icon">🌙</span>
-
-                <div>
-                  <small>Sleep Schedule</small>
-
-                  {editing ? (
-                    <select
-                      name="sleepSchedule"
-                      value={profile.sleepSchedule}
-                      onChange={handleChange}
-                    >
-                      <option>Early Bird</option>
-                      <option>Normal</option>
-                      <option>Night Owl</option>
-                    </select>
-                  ) : (
-                    <strong>{profile.sleepSchedule}</strong>
-                  )}
-                </div>
-              </div>
-
-              <div className="lifestyle-item">
-                <span className="lifestyle-icon">📍</span>
-
-                <div>
-                  <small>Preferred Location</small>
-
-                  {editing ? (
-                    <input
-                      name="location"
-                      value={profile.location}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <strong>{profile.location}</strong>
-                  )}
-                </div>
-              </div>
-
-            </div>
-
-          </section>
-
-          {/* Budget */}
-          <section className="profile-card profile-section">
-
-            <div className="section-title">
-              <div>
-                <h2>Housing Preferences</h2>
-                <p>Your ideal living situation.</p>
-              </div>
-
-              <span>03</span>
-            </div>
-
-            <div className="housing-grid">
-
-              <div className="housing-item">
-                <small>Monthly Budget</small>
-
-                {editing ? (
-                  <select
-                    name="budget"
-                    value={profile.budget}
-                    onChange={handleChange}
-                  >
-                    <option>$600 - $900</option>
-                    <option>$900 - $1,300</option>
-                    <option>$1,300 - $1,700</option>
-                    <option>$1,700+</option>
-                  </select>
-                ) : (
-                  <strong>{profile.budget}</strong>
-                )}
-              </div>
-
-              <div className="housing-item">
-                <small>Move-in Date</small>
-
-                {editing ? (
-                  <input
-                    name="moveIn"
-                    value={profile.moveIn}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  <strong>{profile.moveIn}</strong>
-                )}
-              </div>
-
-              <div className="housing-item">
-                <small>Preferred Room</small>
-
-                <strong>Private Room</strong>
-              </div>
-
-              <div className="housing-item">
-                <small>Apartment Type</small>
-
-                <strong>Shared Apartment</strong>
-              </div>
-
-            </div>
-
-          </section>
-
-          {/* Interests */}
-          <section className="profile-card profile-section">
-
-            <div className="section-title">
-              <div>
-                <h2>Interests</h2>
-                <p>
-                  Shared interests can make living together easier.
-                </p>
-              </div>
-
-              <span>04</span>
-            </div>
-
-            <div className="profile-interests">
-
-              {availableInterests.map((interest) => (
-                <button
-                  type="button"
-                  key={interest}
-                  className={
-                    interests.includes(interest)
-                      ? "interest active"
-                      : "interest"
-                  }
-                  onClick={() => {
-                    if (editing) {
-                      toggleInterest(interest);
-                    }
-                  }}
-                >
-                  {interests.includes(interest) && "✓ "}
-                  {interest}
-                </button>
-              ))}
-
-            </div>
-
-          </section>
-
-        </main>
-      </div>
+      <ConfirmDialog
+        open={blocker.state === "blocked"}
+        title="Leave without saving?"
+        confirmLabel="Save and leave"
+        onClose={() => blocker.reset?.()}
+        onConfirm={async () => {
+          const ok = await save();
+          if (ok) blocker.proceed?.();
+          else blocker.reset?.();
+        }}
+      >
+        <p className="muted">You've changed your profile but haven't saved it.</p>
+        <button type="button" className="btn btn-quiet btn-sm discard-leave" onClick={() => blocker.proceed?.()}>
+          Leave and discard changes
+        </button>
+      </ConfirmDialog>
     </div>
   );
 }
-
-export default Profile;

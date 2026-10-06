@@ -1,0 +1,258 @@
+.auth {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  min-height: 100dvh;
+}
+
+/* ---------- The door ---------- */
+.door-side {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  gap: 24px;
+  padding: 28px clamp(16px, 4vw, 48px) 40px;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.08) 1px, transparent 1px) 0 0 / 22px 100%,
+    var(--rail);
+  color: var(--door-ink);
+  overflow: hidden;
+}
+
+.door-side > .brand {
+  justify-self: start;
+}
+
+.door {
+  position: relative;
+  align-self: center;
+  width: 250px;
+  height: 400px;
+  border-radius: 125px 125px 4px 4px;
+  background: linear-gradient(90deg, #2c6650, #2a5e4a 60%, #24533f);
+  border: 10px solid #153124;
+  border-bottom-width: 0;
+  box-shadow:
+    0 0 0 3px #0f2219,
+    0 24px 0 -8px var(--brass),
+    0 40px 60px -20px rgb(0 0 0 / 0.55);
+}
+
+.door-panels {
+  position: absolute;
+  inset: 70px 26px 26px;
+  display: grid;
+  grid-template-rows: 1fr 1.3fr;
+  gap: 18px;
+}
+
+.door-panels span {
+  border-radius: 6px;
+  box-shadow:
+    inset 2px 2px 0 rgb(0 0 0 / 0.22),
+    inset -2px -2px 0 rgb(255 255 255 / 0.08);
+}
+
+.door-panels span:first-child {
+  border-radius: 90px 90px 6px 6px;
+}
+
+.door-plate {
+  font-size: 1.15rem;
+  position: absolute;
+  left: 50%;
+  top: 150px;
+  translate: -50% 0;
+  width: 178px;
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  padding: 8px 14px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #f0cd73, #d4a23a 70%, #c28f2c);
+  color: #33250a;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -1px 0 rgb(0 0 0 / 0.25),
+    0 3px 6px rgb(0 0 0 / 0.35);
+}
+
+.door-plate::before,
+.door-plate::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: #8a6619;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4);
+}
+
+.door-plate::before {
+  left: 6px;
+}
+
+.door-plate::after {
+  right: 6px;
+}
+
+.door-plate-text {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-stretch: var(--narrow);
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.door-knob {
+  position: absolute;
+  right: 22px;
+  top: 236px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f6dc93, #c28f2c 60%, #7d5a15);
+  box-shadow: 0 3px 4px rgb(0 0 0 / 0.4);
+}
+
+.door-peephole {
+  position: absolute;
+  left: 50%;
+  top: 34px;
+  translate: -50% 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #0b1a13;
+  box-shadow: 0 0 0 3px #c9952f;
+}
+
+.door-caption {
+  max-width: 36ch;
+  text-align: center;
+  color: var(--door-mute);
+}
+
+/* ---------- Form side ---------- */
+.auth-side {
+  display: grid;
+  place-items: center;
+  padding: 40px 16px;
+}
+
+.auth-box {
+  width: min(100%, 420px);
+  display: grid;
+  gap: 18px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+}
+
+.field-row-between {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.text-link.small {
+  font-size: 0.85rem;
+}
+
+.auth-foot {
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+
+.auth-foot a {
+  color: var(--door);
+  font-weight: 600;
+}
+
+:root[data-theme="dark"] .auth-foot a {
+  color: var(--brass);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .auth-foot a {
+    color: var(--brass);
+  }
+}
+
+@media (max-width: 860px) {
+  .auth {
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+
+  .door-side {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 0;
+    height: 176px;
+  }
+
+  .door {
+    align-self: end;
+    width: 170px;
+    height: 150px;
+    border-radius: 85px 85px 0 0;
+    border-width: 7px;
+    box-shadow: 0 0 0 2px #0f2219;
+  }
+
+  .door-panels {
+    inset: 40px 14px 0;
+    grid-template-rows: 1fr;
+  }
+
+  .door-panels span:last-child {
+    display: none;
+  }
+
+  .door-plate {
+    top: 62px;
+    width: 140px;
+    min-height: 34px;
+    padding: 5px 14px;
+    font-size: 0.92rem;
+  }
+
+  .door-knob {
+    top: 110px;
+    right: 12px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .door-peephole {
+    top: 18px;
+    width: 10px;
+    height: 10px;
+  }
+
+  .door-caption {
+    display: none;
+  }
+
+  .door-side > .brand {
+    align-self: start;
+    margin-top: 6px;
+  }
+
+  .auth-side {
+    place-items: start center;
+    padding: 28px 16px 48px;
+  }
+}

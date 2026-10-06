@@ -1,218 +1,167 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-import { profileService, DEFAULT_PROFILE } from "../services/profileService";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { SUPABASE_KEY, SUPABASE_URL, supabase } from "../lib/supabase";
+import { GOOGLE_OFF_MESSAGE } from "../lib/authErrors";
 
-const DEMO_USER = {
-  id: "demo-user-123",
-  email: "alex.morgan@roomiefinder.com",
-  user_metadata: { full_name: "Alex Morgan" },
-};
+const DEMO_FLAG = "rf-demo";
+const DEMO_USER = { id: "me", email: "guest@demo.local", app_metadata: { provider: "demo" }, user_metadata: {} };
 
-const AuthContext = createContext({
-  user: null,
-  session: null,
-  profile: DEFAULT_PROFILE,
-  loading: true,
-  login: async () => {},
-  signup: async () => {},
-  logout: async () => {},
-  loginAsDemo: () => {},
-  updateProfile: async () => {},
-  changePassword: async () => {},
-  refreshProfile: async () => {},
-});
+const AuthContext = createContext(null);
+
+function readDemoFlag() {
+  try {
+    return localStorage.getItem(DEMO_FLAG) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeDemoFlag(on) {
+  try {
+    if (on) localStorage.setItem(DEMO_FLAG, "1");
+    else localStorage.removeItem(DEMO_FLAG);
+  } catch {
+    // Private mode: the demo still runs for this tab.
+  }
+}
+
+/** Asks Supabase which sign-in providers are switched on (null if unknown). */
+async function isProviderEnabled(provider) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_KEY } });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return Boolean(json?.external?.[provider]);
+  } catch {
+    return null;
+  }
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [loading, setLoading] = useState(true);
-
-  async function loadUserProfile(userId) {
-    if (!userId || userId === "demo-user-123") {
-      setProfile(DEFAULT_PROFILE);
-      return;
-    }
-    const prof = await profileService.getProfile(userId);
-    setProfile(prof || { ...DEFAULT_PROFILE, id: userId });
-  }
+  const [demo, setDemo] = useState(readDemoFlag);
+  const [recovery, setRecovery] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
+    let alive = true;
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (alive) setSession(data.session);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
 
-    async function initializeAuth() {
-      try {
-        // Check if user previously signed in with demo account
-        const savedDemo = localStorage.getItem("roomie_demo_active");
-        if (savedDemo === "true") {
-          setUser(DEMO_USER);
-          setProfile(DEFAULT_PROFILE);
-          setLoading(false);
-          return;
-        }
-
-        const {
-          data: { session: initialSession },
-        } = await supabase.auth.getSession();
-
-        if (!mounted) return;
-
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
-
-        if (initialSession?.user) {
-          await loadUserProfile(initialSession.user.id);
-        }
-      } catch (err) {
-        console.warn("Auth initialization notice:", err);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    initializeAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
-      if (!mounted) return;
-
-      const savedDemo = localStorage.getItem("roomie_demo_active");
-      if (savedDemo === "true") return;
-
-      setSession(currentSession);
-      const currentUser = currentSession?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        await loadUserProfile(currentUser.id);
-      } else {
-        setProfile(DEFAULT_PROFILE);
-      }
-
+    const { data } = supabase.auth.onAuthStateChange((event, next) => {
+      if (!alive) return;
+      setSession(next);
       setLoading(false);
+      if (event === "PASSWORD_RECOVERY") setRecovery(true);
+      if (next) {
+        writeDemoFlag(false);
+        setDemo(false);
+      }
     });
 
     return () => {
-      mounted = false;
-      subscription.unsubscribe();
+      alive = false;
+      data.subscription.unsubscribe();
     };
   }, []);
 
-  function loginAsDemo() {
-    localStorage.setItem("roomie_demo_active", "true");
-    setUser(DEMO_USER);
-    setProfile(DEFAULT_PROFILE);
-  }
-
-  async function login(email, password) {
-    localStorage.removeItem("roomie_demo_active");
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+  const signInWithGoogle = useCallback(async () => {
+    const enabled = await isProviderEnabled("google");
+    if (enabled === false) throw new Error(GOOGLE_OFF_MESSAGE);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: "select_account" },
+      },
     });
-
     if (error) throw error;
+  }, []);
 
-    if (data?.user) {
-      setUser(data.user);
-      setSession(data.session);
-      await loadUserProfile(data.user.id);
-    }
+  const signInWithEmail = useCallback(async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }, []);
 
-    return data;
-  }
-
-  async function signup({ name, email, password }) {
-    localStorage.removeItem("roomie_demo_active");
+  const signUpWithEmail = useCallback(async ({ name, email, password }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: {
-          full_name: name,
-        },
+        data: { full_name: name },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-
     if (error) throw error;
-
-    if (data?.user) {
-      try {
-        await profileService.createProfile(data.user.id, { name });
-      } catch (profileErr) {
-        console.warn("Profile creation notice:", profileErr);
-      }
+    // Supabase hides "already registered" by returning a user with no identities.
+    if (data.user && data.user.identities?.length === 0) {
+      throw new Error("User already registered");
     }
+    return { needsConfirmation: !data.session };
+  }, []);
 
-    return data;
-  }
-
-  async function logout() {
-    localStorage.removeItem("roomie_demo_active");
-    try {
-      await supabase.auth.signOut();
-    } catch (err) {
-      console.warn("Sign out notice:", err);
-    } finally {
-      setUser(null);
-      setSession(null);
-      setProfile(DEFAULT_PROFILE);
-    }
-  }
-
-  async function updateProfile(updates) {
-    if (!user) return null;
-    if (user.id === "demo-user-123") {
-      const updated = { ...profile, ...updates };
-      setProfile(updated);
-      return updated;
-    }
-    const updated = await profileService.updateProfile(user.id, updates);
-    setProfile(updated);
-    return updated;
-  }
-
-  async function changePassword(newPassword) {
-    if (user?.id === "demo-user-123") {
-      return { success: true };
-    }
-    const { data, error } = await supabase.auth.updateUser({
-      password: newPassword,
+  const sendPasswordReset = useCallback(async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) throw error;
-    return data;
-  }
+  }, []);
 
-  async function refreshProfile() {
-    if (user) {
-      await loadUserProfile(user.id);
+  const updatePassword = useCallback(async (password) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+    setRecovery(false);
+  }, []);
+
+  const startDemo = useCallback(() => {
+    writeDemoFlag(true);
+    setDemo(true);
+  }, []);
+
+  const signOut = useCallback(async () => {
+    if (demo) {
+      writeDemoFlag(false);
+      setDemo(false);
+      return;
     }
-  }
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      setSession(null);
+    }
+  }, [demo]);
 
-  const value = {
-    user,
-    session,
-    profile,
-    loading,
-    login,
-    signup,
-    logout,
-    loginAsDemo,
-    updateProfile,
-    changePassword,
-    refreshProfile,
-  };
+  const value = useMemo(() => {
+    const user = demo ? DEMO_USER : (session?.user ?? null);
+    return {
+      user,
+      session,
+      mode: demo ? "demo" : user ? "supabase" : null,
+      provider: demo ? "demo" : (user?.app_metadata?.provider ?? null),
+      loading: demo ? false : loading,
+      recovery,
+      signInWithGoogle,
+      signInWithEmail,
+      signUpWithEmail,
+      sendPasswordReset,
+      updatePassword,
+      startDemo,
+      signOut,
+    };
+  }, [demo, session, loading, recovery, signInWithGoogle, signInWithEmail, signUpWithEmail, sendPasswordReset, updatePassword, startDemo, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
+  return ctx;
 }
