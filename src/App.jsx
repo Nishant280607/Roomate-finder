@@ -1,112 +1,92 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
-
-import Home from "./pages/home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-
-import DashboardLayout from "./layouts/DashboardLayout";
-
-import Dashboard from "./pages/Dashboard";
+import { createBrowserRouter, Link, Outlet, RouterProvider } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { StoreProvider } from "./context/StoreContext";
+import { ToastProvider } from "./context/ToastContext";
+import { AppGate, AppShell, PublicOnly, RequireAuth } from "./components/Shell";
+import { BrandMark } from "./components/Bits";
+import Landing from "./pages/Landing";
+import { AuthCallback, Login, ResetPassword, Signup } from "./pages/Auth";
+import Onboarding from "./pages/Onboarding";
+import Home from "./pages/Home";
 import Discover from "./pages/Discover";
-import Matches from "./pages/Matches";
+import Person from "./pages/Person";
+import Connections from "./pages/Connections";
 import Messages from "./pages/Messages";
 import Saved from "./pages/Saved";
-import Notifications from "./pages/Notifications";
+import Activity from "./pages/Activity";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 
-function App() {
+function Providers() {
   return (
-    <BrowserRouter>
-      <Routes>
-
-        {/* =========================
-            PUBLIC PAGES
-        ========================= */}
-
-        <Route
-          path="/"
-          element={
-            <>
-              <Navbar />
-              <Home />
-            </>
-          }
-        />
-
-        <Route path="/login" element={<Login />} />
-
-        <Route path="/register" element={<Register />} />
-
-
-        {/* =========================
-            PROTECTED APPLICATION PAGES
-        ========================= */}
-
-        <Route
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
-          />
-
-          <Route
-            path="/discover"
-            element={<Discover />}
-          />
-
-          <Route
-            path="/matches"
-            element={<Matches />}
-          />
-
-          <Route
-            path="/messages"
-            element={<Messages />}
-          />
-
-          <Route
-            path="/saved"
-            element={<Saved />}
-          />
-
-          <Route
-            path="/notifications"
-            element={<Notifications />}
-          />
-
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
-
-          <Route
-            path="/settings"
-            element={<Settings />}
-          />
-        </Route>
-
-
-        {/* =========================
-            FALLBACK
-        ========================= */}
-
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
-
-      </Routes>
-    </BrowserRouter>
+    <ToastProvider>
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 
-export default App;
+function SignedIn() {
+  return (
+    <RequireAuth>
+      <StoreProvider>
+        <AppGate>
+          <Outlet />
+        </AppGate>
+      </StoreProvider>
+    </RequireAuth>
+  );
+}
+
+function NotFound() {
+  return (
+    <div className="splash">
+      <BrandMark size={44} />
+      <h1 className="h-page">Wrong door</h1>
+      <p className="muted">There's nothing at this address.</p>
+      <Link to="/" className="btn btn-primary">
+        Go to the start
+      </Link>
+    </div>
+  );
+}
+
+const router = createBrowserRouter([
+  {
+    element: <Providers />,
+    children: [
+      { path: "/", element: <Landing /> },
+      { path: "/login", element: <PublicOnly><Login /></PublicOnly> },
+      { path: "/signup", element: <PublicOnly><Signup /></PublicOnly> },
+      { path: "/auth/callback", element: <AuthCallback /> },
+      { path: "/reset-password", element: <ResetPassword /> },
+      {
+        element: <SignedIn />,
+        children: [
+          { path: "/welcome", element: <Onboarding /> },
+          {
+            element: <AppShell />,
+            children: [
+              { path: "/home", element: <Home /> },
+              { path: "/discover", element: <Discover /> },
+              { path: "/people/:id", element: <Person /> },
+              { path: "/connections", element: <Connections /> },
+              { path: "/messages", element: <Messages /> },
+              { path: "/messages/:id", element: <Messages /> },
+              { path: "/saved", element: <Saved /> },
+              { path: "/activity", element: <Activity /> },
+              { path: "/profile", element: <Profile /> },
+              { path: "/settings", element: <Settings /> },
+            ],
+          },
+        ],
+      },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+]);
+
+export default function App() {
+  return <RouterProvider router={router} />;
+}

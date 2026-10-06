@@ -1,0 +1,486 @@
+.landing {
+  background: var(--plaster);
+}
+
+.landing-nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px clamp(16px, 5vw, 64px);
+  background: var(--rail);
+}
+
+.landing-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.landing-signin {
+  white-space: nowrap;
+  color: var(--door-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.landing-signin:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 72px);
+  padding: clamp(40px, 7vw, 96px) clamp(16px, 5vw, 64px) clamp(56px, 8vw, 112px);
+  background: var(--rail);
+  color: var(--door-ink);
+}
+
+.hero-title {
+  font-size: clamp(2.4rem, 1.6rem + 3.4vw, 4.4rem);
+  max-width: 13ch;
+  text-wrap: balance;
+}
+
+.hero-lede {
+  margin-top: 22px;
+  max-width: 52ch;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--door-mute);
+}
+
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.hero .btn-google,
+.closer .btn-google {
+  border-color: transparent;
+}
+
+.btn-quiet-light {
+  background: transparent;
+  color: var(--door-ink);
+  border: 1px solid rgb(255 255 255 / 0.28);
+}
+
+.btn-quiet-light:hover {
+  border-color: rgb(255 255 255 / 0.6);
+  background: rgb(255 255 255 / 0.05);
+}
+
+.hero-small {
+  margin-top: 16px;
+  color: var(--door-mute);
+  font-size: 0.92rem;
+}
+
+.hero-small a {
+  color: var(--door-ink);
+}
+
+/* ---------- The intercom (brass panel of nameplates) ---------- */
+.intercom {
+  justify-self: end;
+  width: min(100%, 460px);
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #e3b551, #c9952f 55%, #b9862a);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    inset 0 -2px 0 rgb(0 0 0 / 0.2),
+    0 30px 60px -24px rgb(0 0 0 / 0.55);
+  color: #2b1f05;
+}
+
+.intercom-head {
+  margin: 2px 4px 14px;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: #4a3609;
+}
+
+.intercom-plates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.nameplate {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 8px 6px 12px;
+  border-radius: 4px;
+  border: 1px solid rgb(60 40 5 / 0.35);
+  background: #fbf8ee;
+  color: #1d1a12;
+  text-align: left;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+.nameplate-unit {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #7a6a44;
+  font-variant-numeric: tabular-nums;
+}
+
+.nameplate-name {
+  font-stretch: var(--narrow);
+  font-weight: 680;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.nameplate-bell {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #26261f;
+  color: #e8bd5b;
+  border: 2px solid #b48428;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.nameplate:hover .nameplate-bell {
+  color: #fff3d0;
+}
+
+.nameplate.is-picked {
+  border-color: #1e4636;
+  box-shadow: 0 0 0 2px #1e4636;
+}
+
+.nameplate.is-picked .nameplate-bell {
+  background: #f3d27e;
+  color: #3a2a06;
+  border-color: #fff3d0;
+}
+
+.nameplate.rings .nameplate-bell {
+  animation: ring 0.9s ease-in-out 0.6s 2;
+}
+
+@keyframes ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(255 230 160 / 0);
+  }
+  40% {
+    box-shadow: 0 0 0 8px rgb(255 230 160 / 0.55);
+  }
+}
+
+.intercom-screen {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 10px;
+  background: #13281f;
+  color: #e7efe9;
+  box-shadow: inset 0 2px 8px rgb(0 0 0 / 0.45);
+}
+
+.intercom-who {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.intercom-name {
+  font-weight: 700;
+  font-size: 1.02rem;
+}
+
+.intercom-sub {
+  color: #a8c0b4;
+  font-size: 0.88rem;
+}
+
+.intercom-reasons {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 0.92rem;
+}
+
+.intercom-reasons li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.intercom-reasons svg {
+  flex: none;
+  margin-top: 3px;
+  color: #e8bd5b;
+}
+
+.intercom-note {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: #87a093;
+}
+
+/* ---------- Steps ---------- */
+.steps {
+  padding: clamp(56px, 8vw, 104px) clamp(16px, 5vw, 64px) 32px;
+}
+
+.steps-list {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  margin-top: 36px;
+  max-width: 1180px;
+}
+
+.steps-list::before {
+  content: "";
+  position: absolute;
+  top: 19px;
+  left: 20px;
+  right: 20%;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 14px);
+}
+
+.steps-list li {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.steps-list p {
+  color: var(--ink-2);
+  max-width: 36ch;
+}
+
+.step-stud {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brass);
+  color: var(--brass-ink);
+  font-weight: 800;
+  box-shadow:
+    inset 0 -2px 0 rgb(0 0 0 / 0.18),
+    0 0 0 5px var(--plaster);
+  margin-bottom: 6px;
+}
+
+/* ---------- What goes into a match ---------- */
+.weights {
+  padding: 56px clamp(16px, 5vw, 64px) clamp(56px, 8vw, 104px);
+  display: grid;
+  gap: 28px;
+}
+
+.weights-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.weights-copy .lede {
+  max-width: 64ch;
+}
+
+.weights-bar {
+  max-width: 1180px;
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 92px;
+  border: 1px solid var(--line);
+}
+
+.weight {
+  flex-basis: 0;
+  min-width: 0;
+  display: grid;
+  align-content: space-between;
+  gap: 8px;
+  padding: 12px;
+  color: #f2f5f0;
+}
+
+.weight + .weight {
+  border-left: 1px solid rgb(255 255 255 / 0.25);
+}
+
+.weight-num {
+  font-stretch: var(--wide);
+  font-weight: 780;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.weight-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.weight-lifestyle { background: #1e4636; }
+.weight-budget { background: #2f5a49; }
+.weight-location { background: #44705d; }
+.weight-habits { background: #6a7f4a; }
+.weight-housing { background: #a3832f; }
+.weight-moveIn { background: #c1952f; color: #2b1f05; }
+.weight-extras { background: #d9b45a; color: #2b1f05; }
+
+/* ---------- Closer + footer ---------- */
+.closer {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: clamp(48px, 7vw, 88px) clamp(16px, 5vw, 64px);
+  background: var(--door);
+  color: var(--door-ink);
+}
+
+.closer-title {
+  font-size: clamp(1.8rem, 1.3rem + 2vw, 3rem);
+  max-width: 20ch;
+}
+
+.landing-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding: 28px clamp(16px, 5vw, 64px);
+  background: var(--rail);
+  color: var(--door-mute);
+  font-size: 0.9rem;
+}
+
+:root[data-theme="dark"] .closer {
+  background: #1a3a2d;
+}
+
+.landing-foot-links {
+  display: flex;
+  gap: 18px;
+}
+
+.landing-foot a,
+.linklike {
+  color: var(--door-ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .intercom {
+    justify-self: stretch;
+    width: 100%;
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 720px) {
+  .steps-list {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .steps-list::before {
+    top: 20px;
+    bottom: 20px;
+    left: 19px;
+    right: auto;
+    width: 2px;
+    height: auto;
+    background: repeating-linear-gradient(180deg, var(--line) 0 8px, transparent 8px 14px);
+  }
+
+  .steps-list li {
+    padding-left: 60px;
+  }
+
+  .step-stud {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .weights-bar {
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .weight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-grow: 0 !important;
+    flex-basis: auto;
+    padding: 10px 14px;
+  }
+
+  .weight + .weight {
+    border-left: 0;
+    border-top: 1px solid rgb(255 255 255 / 0.2);
+  }
+
+  .weight-num {
+    font-size: 1.15rem;
+    width: 2.2ch;
+  }
+
+  .landing-nav-links {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .landing-signin {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .intercom {
+    padding: 12px;
+  }
+
+  .intercom-plates {
+    gap: 8px;
+  }
+
+  .nameplate {
+    gap: 6px;
+    padding-left: 8px;
+  }
+
+  .hero-ctas .btn {
+    width: 100%;
+  }
+}

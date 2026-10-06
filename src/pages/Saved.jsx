@@ -1,81 +1,33 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { savedService } from "../services/savedService";
-import RoommateCard from "../components/RoommateCard";
-import RoommateModal from "../components/RoommateModal";
-import "./saved.css";
+import { useStore } from "../context/StoreContext";
+import { PersonCard } from "../components/People";
 
-function Saved() {
-  const { user } = useAuth();
-  const [savedPeople, setSavedPeople] = useState([]);
-  const [selectedRoommate, setSelectedRoommate] = useState(null);
-
-  useEffect(() => {
-    async function load() {
-      const data = await savedService.getSaved(user?.id);
-      setSavedPeople(data);
-    }
-    load();
-  }, [user]);
-
-  async function handleToggleSave(roommate) {
-    const res = await savedService.toggleSave(user?.id, roommate);
-    setSavedPeople(res.list);
-  }
+export default function Saved() {
+  const { saved, people } = useStore();
+  const byId = new Map(people.map((p) => [p.id, p]));
+  const list = saved.map((id) => byId.get(id)).filter(Boolean);
 
   return (
-    <div className="saved-page animate-fade-up">
-      {/* Header */}
-      <section className="saved-header-card">
-        <div>
-          <span className="saved-eyebrow">YOUR SHORTLIST</span>
-          <h1>Saved Roommates</h1>
-          <p>Keep track of potential roommates and reach out when you're ready.</p>
-        </div>
-
-        <div className="saved-count-pill">
-          <strong>{savedPeople.length}</strong>
-          <span>Saved</span>
-        </div>
-      </section>
-
-      {/* Grid or Empty State */}
-      {savedPeople.length > 0 ? (
-        <section className="saved-cards-grid">
-          {savedPeople.map((roommate) => (
-            <RoommateCard
-              key={roommate.id}
-              roommate={roommate}
-              isSaved={true}
-              onToggleSave={handleToggleSave}
-              onViewProfile={(r) => setSelectedRoommate(r)}
-            />
+    <div className="page">
+      <header className="page-head">
+        <h1 className="h-page">Saved</h1>
+        <p className="lede">People you want to come back to. Only you can see this list.</p>
+      </header>
+      {list.length ? (
+        <div className="cards">
+          {list.map((p) => (
+            <PersonCard key={p.id} person={p} />
           ))}
-        </section>
+        </div>
       ) : (
-        <div className="saved-empty-box">
-          <div className="empty-bookmark-icon">☆</div>
-          <h2>No saved roommates yet</h2>
-          <p>
-            When you discover someone whose lifestyle matches yours, click the heart or save icon to keep them here.
-          </p>
-          <Link to="/discover" className="btn-empty-discover">
-            Discover Roommates →
+        <div className="empty">
+          <h3>Nothing saved yet</h3>
+          <p>Press the bookmark on anyone in Discover to keep them here while you decide.</p>
+          <Link to="/discover" className="btn btn-ghost btn-sm">
+            Open Discover
           </Link>
         </div>
-      )}
-
-      {selectedRoommate && (
-        <RoommateModal
-          roommate={selectedRoommate}
-          isSaved={true}
-          onToggleSave={handleToggleSave}
-          onClose={() => setSelectedRoommate(null)}
-        />
       )}
     </div>
   );
 }
-
-export default Saved;
