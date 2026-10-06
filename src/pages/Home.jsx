@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useStore } from "../context/StoreContext";
 import { Avatar } from "../components/Bits";
 import { ConnectActions, PersonCard, PersonRow } from "../components/People";
-import { firstName, greeting, relativeTime } from "../lib/format";
+import { firstName, greeting, messagePreview, relativeTime } from "../lib/format";
 import { profileGaps } from "../lib/match";
 
 function summary({ requests, unreadMessages }) {
@@ -125,10 +125,7 @@ export default function Home() {
                   <Avatar person={p} size={40} online={online.has(p.id) && p.show_online !== false} />
                   <span className="thread-main">
                     <span className="thread-name">{p.full_name}</span>
-                    <span className="thread-last">
-                      {t.last.sender_id === me.id ? "You: " : ""}
-                      {t.last.body}
-                    </span>
+                    <span className="thread-last">{messagePreview(t.last, me.id)}</span>
                   </span>
                   <span className="thread-meta">
                     <span className="thread-time">{relativeTime(t.last.created_at)}</span>

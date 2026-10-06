@@ -5,23 +5,13 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Avatar, Brand, GoogleMark, MatchPlate } from "../components/Bits";
 import { DEMO_ME, DEMO_PEOPLE } from "../data/demoPeople";
-import { computeMatch, WEIGHTS } from "../lib/match";
+import { computeMatch } from "../lib/match";
 import { daysFromNow, rentRange } from "../lib/format";
 import { friendlyAuthError } from "../lib/authErrors";
 import { HOUSING } from "../lib/options";
 
 const BOARD = ["d04", "d01", "d06", "d05", "d02", "d07"];
 const UNITS = ["1A", "1B", "2A", "2B", "3A", "3B"];
-
-const SCORE_PARTS = [
-  { key: "lifestyle", label: "Daily habits" },
-  { key: "budget", label: "Budget" },
-  { key: "location", label: "Location" },
-  { key: "habits", label: "Smoking, pets, food" },
-  { key: "housing", label: "Room situation" },
-  { key: "moveIn", label: "Move-in date" },
-  { key: "extras", label: "Interests, languages" },
-];
 
 function useBoard() {
   return useMemo(() => {
@@ -42,7 +32,7 @@ function Intercom() {
 
   return (
     <figure className="intercom" aria-label="Sample matches">
-      <figcaption className="intercom-head">Ring a flat to see how a match is explained</figcaption>
+      <figcaption className="intercom-head">Ring a bell to see why you'd get along</figcaption>
       <div className="intercom-plates">
         {board.map((p, i) => (
           <button
@@ -80,18 +70,17 @@ function Intercom() {
             </li>
           ))}
         </ul>
-        <p className="intercom-note">Scored against a sample student looking for a room in Coimbatore.</p>
+        <p className="intercom-note">Sample profiles</p>
       </div>
     </figure>
   );
 }
 
 export default function Landing() {
-  const { user, signInWithGoogle, startDemo } = useAuth();
+  const { user, signInWithGoogle, startDemo, googleEnabled } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
-  const total = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
 
   async function google() {
     setBusy(true);
@@ -114,9 +103,15 @@ export default function Landing() {
     </Link>
   ) : (
     <>
-      <button type="button" className="btn btn-google btn-lg" onClick={google} disabled={busy}>
-        <GoogleMark /> Continue with Google
-      </button>
+      {googleEnabled === false ? (
+        <Link to="/signup" className="btn btn-brass btn-lg">
+          Create your account
+        </Link>
+      ) : (
+        <button type="button" className="btn btn-google btn-lg" onClick={google} disabled={busy}>
+          <GoogleMark /> Continue with Google
+        </button>
+      )}
       <button type="button" className="btn btn-quiet-light btn-lg" onClick={demo}>
         Explore the demo
       </button>
@@ -155,7 +150,7 @@ export default function Landing() {
           <div className="hero-ctas">{ctas}</div>
           {!user && (
             <p className="hero-small">
-              Have an account? <Link to="/login">Sign in with email</Link>
+              Have an account? <Link to="/login">Sign in</Link>
             </p>
           )}
         </div>
@@ -183,26 +178,6 @@ export default function Landing() {
             <p>Send a request with a short note. When they accept, your conversation opens. Your email and phone number stay private.</p>
           </li>
         </ol>
-      </section>
-
-      <section className="weights" aria-labelledby="weights-title">
-        <div className="weights-copy">
-          <h2 id="weights-title" className="h-page">
-            What goes into a match
-          </h2>
-          <p className="lede">
-            The score out of 100 is a weighted mix of what you both said. Questions either of you skipped count as neutral, so an
-            unfinished profile isn't marked down twice.
-          </p>
-        </div>
-        <div className="weights-bar" role="list">
-          {SCORE_PARTS.map((part) => (
-            <div key={part.key} role="listitem" className={`weight weight-${part.key}`} style={{ flexGrow: WEIGHTS[part.key] }}>
-              <span className="weight-num num">{Math.round((WEIGHTS[part.key] / total) * 100)}</span>
-              <span className="weight-label">{part.label}</span>
-            </div>
-          ))}
-        </div>
       </section>
 
       <section className="closer">

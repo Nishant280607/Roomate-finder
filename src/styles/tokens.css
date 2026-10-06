@@ -1,41 +1,41 @@
 /*
   RoomieFinder design tokens.
-  Palette: painted front door (green), brass fittings, plaster walls.
+  Palette: a midnight-blue front door, brass fittings, cool plaster walls.
   Type: Archivo, using its width axis — expanded for headings, normal for text,
   condensed for name slips.
 */
 :root {
-  --door: #1e4636;
-  --door-2: #285a46;
-  --door-ink: #f2f5f0;
-  --door-mute: #a8c0b4;
-  --rail: #1e4636;
-  --rail-line: #2f5a49;
+  --door: #22346a;
+  --door-2: #2c4180;
+  --door-ink: #f4f6fb;
+  --door-mute: #b4bfd8;
+  --rail: #1a2547;
+  --rail-line: #2a3760;
 
   --brass: #d4a23a;
   --brass-2: #e8bd5b;
   --brass-ink: #3a2a06;
   --brass-soft: #f6ead0;
 
-  --plaster: #eceee8;
+  --plaster: #eceff5;
   --paper: #ffffff;
-  --paper-2: #f5f7f3;
-  --slip: #fbfaf6;
+  --paper-2: #f5f7fb;
+  --slip: #fbfbfd;
 
-  --ink: #18211d;
-  --ink-2: #47524c;
-  --ink-3: #626d67;
-  --line: #d2d8d0;
-  --line-2: #e2e6df;
+  --ink: #171c2e;
+  --ink-2: #464e66;
+  --ink-3: #626a80;
+  --line: #d2d7e3;
+  --line-2: #e2e6ee;
 
-  --brick: #a83c28;
-  --brick-bg: #f7e5df;
-  --ok: #276645;
-  --ok-bg: #e1efe6;
+  --brick: #b13a2c;
+  --brick-bg: #f8e4e0;
+  --ok: #24704a;
+  --ok-bg: #e0f0e7;
 
   --you: var(--door);
   --them: var(--brass);
-  --focus: #1e4636;
+  --focus: #22346a;
 
   --font: "Archivo Variable", "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --wide: 125%;
@@ -61,58 +61,58 @@
 }
 
 :root[data-theme="dark"] {
-  --door: #2f6a53;
-  --door-2: #3a7c62;
-  --door-ink: #f2f5f0;
-  --door-mute: #a8c0b4;
-  --rail: #13201a;
-  --rail-line: #22342b;
+  --door: #3d5aa8;
+  --door-2: #4b69ba;
+  --door-ink: #f4f6fb;
+  --door-mute: #b4bfd8;
+  --rail: #10172b;
+  --rail-line: #1f2943;
   --brass: #e0b04c;
   --brass-2: #ecc56d;
   --brass-ink: #2e2104;
   --brass-soft: #3a2f17;
-  --plaster: #0f1512;
-  --paper: #17201b;
-  --paper-2: #1c2721;
-  --slip: #222d27;
-  --ink: #e6ebe5;
-  --ink-2: #b8c2bb;
-  --ink-3: #93a097;
-  --line: #2e3a33;
-  --line-2: #25312a;
-  --brick: #e5806a;
-  --brick-bg: #3a1f18;
-  --ok: #82c9a0;
-  --ok-bg: #1b3126;
+  --plaster: #0d1220;
+  --paper: #151c2e;
+  --paper-2: #1a2236;
+  --slip: #202a40;
+  --ink: #e7eaf3;
+  --ink-2: #b9c1d6;
+  --ink-3: #939db6;
+  --line: #2c3652;
+  --line-2: #232c44;
+  --brick: #ec8a74;
+  --brick-bg: #3b1f1a;
+  --ok: #86cfa5;
+  --ok-bg: #19301f;
   --focus: #e0b04c;
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --door: #2f6a53;
-    --door-2: #3a7c62;
-    --door-ink: #f2f5f0;
-    --door-mute: #a8c0b4;
-    --rail: #13201a;
-    --rail-line: #22342b;
+    --door: #3d5aa8;
+    --door-2: #4b69ba;
+    --door-ink: #f4f6fb;
+    --door-mute: #b4bfd8;
+    --rail: #10172b;
+    --rail-line: #1f2943;
     --brass: #e0b04c;
     --brass-2: #ecc56d;
     --brass-ink: #2e2104;
     --brass-soft: #3a2f17;
-    --plaster: #0f1512;
-    --paper: #17201b;
-    --paper-2: #1c2721;
-    --slip: #222d27;
-    --ink: #e6ebe5;
-    --ink-2: #b8c2bb;
-    --ink-3: #93a097;
-    --line: #2e3a33;
-    --line-2: #25312a;
-    --brick: #e5806a;
-    --brick-bg: #3a1f18;
-    --ok: #82c9a0;
-    --ok-bg: #1b3126;
+    --plaster: #0d1220;
+    --paper: #151c2e;
+    --paper-2: #1a2236;
+    --slip: #202a40;
+    --ink: #e7eaf3;
+    --ink-2: #b9c1d6;
+    --ink-3: #939db6;
+    --line: #2c3652;
+    --line-2: #232c44;
+    --brick: #ec8a74;
+    --brick-bg: #3b1f1a;
+    --ok: #86cfa5;
+    --ok-bg: #19301f;
     --focus: #e0b04c;
     color-scheme: dark;
   }

@@ -1,10 +1,11 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, RotateCcw, SendHorizontal, Trash2 } from "lucide-react";
+import { ArrowLeft, ClipboardList, RotateCcw, SendHorizontal, Trash2 } from "lucide-react";
 import { useStore } from "../context/StoreContext";
 import { Avatar } from "../components/Bits";
 import { ConnectActions } from "../components/People";
-import { clockTime, dayLabel, firstName, relativeTime } from "../lib/format";
+import { PrefsCard, SharePrefsDialog } from "../components/SharePrefs";
+import { clockTime, dayLabel, firstName, messagePreview, relativeTime } from "../lib/format";
 
 function starters(me, them, match) {
   const out = [];
@@ -54,10 +55,7 @@ function ThreadList({ activeId }) {
                 <Avatar person={p} size={44} online={online.has(p.id) && p.show_online !== false} />
                 <span className="thread-main">
                   <span className="thread-name">{p.full_name}</span>
-                  <span className="thread-last">
-                    {t.last.sender_id === me.id ? "You: " : ""}
-                    {t.last.body}
-                  </span>
+                  <span className="thread-last">{messagePreview(t.last, me.id)}</span>
                 </span>
                 <span className="thread-meta">
                   <span className="thread-time">{relativeTime(t.last.created_at)}</span>
@@ -96,6 +94,7 @@ function Conversation({ otherId }) {
   const person = people.find((p) => p.id === otherId) || memberById.get(otherId);
   const rel = relationTo(otherId);
   const [text, setText] = useState("");
+  const [sharing, setSharing] = useState(false);
   const scroller = useRef(null);
   const input = useRef(null);
   const lastTyping = useRef(0);
@@ -174,6 +173,9 @@ function Conversation({ otherId }) {
                   {s}
                 </button>
               ))}
+              <button type="button" className="chip" onClick={() => setSharing(true)}>
+                <ClipboardList size={14} aria-hidden /> Share my preferences
+              </button>
             </div>
           </div>
         )}
@@ -190,14 +192,21 @@ function Conversation({ otherId }) {
                 </p>
               )}
               <div className={`bubble-row ${mine ? "mine" : "theirs"}`}>
-                <div className={`bubble ${m.failed ? "is-failed" : ""} ${m.pending ? "is-pending" : ""}`}>
-                  <p>{m.body}</p>
-                  <time dateTime={m.created_at}>{clockTime(m.created_at)}</time>
-                </div>
+                {m.kind === "prefs" ? (
+                  <div className={`card-bubble ${m.failed ? "is-failed" : ""} ${m.pending ? "is-pending" : ""}`}>
+                    <PrefsCard prefs={m.payload} title={mine ? "Your preferences" : `${name}'s preferences`} compareTo={mine ? null : me} />
+                    <time dateTime={m.created_at}>{clockTime(m.created_at)}</time>
+                  </div>
+                ) : (
+                  <div className={`bubble ${m.failed ? "is-failed" : ""} ${m.pending ? "is-pending" : ""}`}>
+                    <p>{m.body}</p>
+                    <time dateTime={m.created_at}>{clockTime(m.created_at)}</time>
+                  </div>
+                )}
                 {m.failed && (
                   <div className="bubble-fail">
                     Not sent.
-                    <button type="button" className="text-link" onClick={() => { discardMessage(m.id); sendMessage(otherId, m.body); }}>
+                    <button type="button" className="text-link" onClick={() => { discardMessage(m.id); sendMessage(otherId, m.body, { kind: m.kind, payload: m.payload }); }}>
                       <RotateCcw size={13} aria-hidden /> Retry
                     </button>
                     <button type="button" className="text-link" onClick={() => discardMessage(m.id)}>
@@ -224,6 +233,15 @@ function Conversation({ otherId }) {
 
       {canSend ? (
         <form className="composer" onSubmit={submit}>
+          <button
+            type="button"
+            className="icon-btn composer-tool"
+            aria-label="Share my preferences"
+            title="Share my preferences"
+            onClick={() => setSharing(true)}
+          >
+            <ClipboardList size={18} aria-hidden />
+          </button>
           <label className="sr-only" htmlFor="composer">
             Message {name}
           </label>
@@ -266,6 +284,7 @@ function Conversation({ otherId }) {
           <ConnectActions person={person} size="sm" />
         </div>
       )}
+      {sharing && <SharePrefsDialog person={person} onClose={() => setSharing(false)} />}
     </section>
   );
 }

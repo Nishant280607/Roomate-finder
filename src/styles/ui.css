@@ -520,8 +520,26 @@ button.chip[aria-pressed="true"]:hover {
   box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.45);
 }
 
+.dialog {
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+}
+
+.dialog-wide {
+  width: min(600px, calc(100vw - 32px));
+}
+
+.dialog-wide .dialog-actions {
+  position: sticky;
+  bottom: -24px;
+  margin: 0 -24px -24px;
+  padding: 14px 24px 20px;
+  background: var(--paper);
+  border-top: 1px solid var(--line-2);
+}
+
 .dialog::backdrop {
-  background: rgb(10 20 15 / 0.45);
+  background: rgb(8 12 28 / 0.5);
 }
 
 .dialog-body {

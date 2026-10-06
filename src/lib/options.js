@@ -178,5 +178,18 @@ export const EMPTY_PROFILE = {
   onboarded: false,
 };
 
+/** The parts of a profile that go into a preferences card shared in chat. */
+export const PREF_KEYS = [
+  "housing", "city", "area", "rent_min", "rent_max", "move_in",
+  "sleep", "tidiness", "social", "guests", "noise",
+  "smoking", "drinking", "pets", "diet",
+];
+
+export function pickPrefs(profile) {
+  const out = {};
+  for (const key of PREF_KEYS) out[key] = profile?.[key] ?? null;
+  return out;
+}
+
 /** Columns the app is allowed to write on the members table. */
 export const PROFILE_FIELDS = Object.keys(EMPTY_PROFILE);

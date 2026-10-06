@@ -10,11 +10,15 @@ import { firstName } from "../lib/format";
 const StoreContext = createContext(null);
 const NONE = { state: "none", conn: null };
 
+// Shown on screen, so it never includes technical details. The raw error goes to the console.
 function errorText(error) {
   const message = String(error?.message || error || "");
-  if (/row-level security/i.test(message)) return "You can't do that. You may need to be connected first.";
-  if (/failed to fetch|network/i.test(message)) return "Couldn't reach the server. Check your connection.";
-  return message || "Something went wrong. Try again.";
+  if (message) console.error("[RoomieFinder]", message);
+  if (/row-level security|permission denied/i.test(message)) return "You can't do that yet. You may need to be connected first.";
+  if (/failed to fetch|network|load failed/i.test(message)) return "Couldn't connect. Check your internet connection and try again.";
+  if (/too large|image/i.test(message) && /photo|image|file/i.test(message)) return "That photo couldn't be uploaded. Try a smaller JPG or PNG.";
+  if (/only message people you're connected with|request is no longer available|isn't an image/i.test(message)) return message;
+  return "Something went wrong. Please try again.";
 }
 
 async function fetchEverything(api) {
@@ -300,7 +304,7 @@ export function StoreProvider({ children }) {
   );
 
   const sendMessage = useCallback(
-    async (to, body) => {
+    async (to, body, extra = {}) => {
       const text = body.trim();
       if (!text) return;
       const temp = {
@@ -308,13 +312,15 @@ export function StoreProvider({ children }) {
         sender_id: me.id,
         recipient_id: to,
         body: text,
+        kind: extra.kind || "text",
+        payload: extra.payload ?? null,
         created_at: new Date().toISOString(),
         read_at: null,
         pending: true,
       };
       setMessages((list) => [...list, temp]);
       try {
-        const row = await api.sendMessage(to, text);
+        const row = await api.sendMessage(to, text, extra);
         setMessages((list) => {
           const withoutTemp = list.filter((m) => m.id !== temp.id);
           return withoutTemp.some((m) => m.id === row.id) ? withoutTemp : [...withoutTemp, row];
@@ -325,6 +331,15 @@ export function StoreProvider({ children }) {
       }
     },
     [api, me, toast],
+  );
+
+  /** Optionally saves edited preferences to the profile, then posts them as a card. */
+  const sharePreferences = useCallback(
+    async (to, prefs, alsoSave) => {
+      if (alsoSave) await saveProfile(prefs);
+      await sendMessage(to, "Shared my preferences", { kind: "prefs", payload: prefs });
+    },
+    [saveProfile, sendMessage],
   );
 
   const discardMessage = useCallback((id) => setMessages((list) => list.filter((m) => m.id !== id)), []);
@@ -397,6 +412,7 @@ export function StoreProvider({ children }) {
     removeConnection,
     toggleSave,
     sendMessage,
+    sharePreferences,
     discardMessage,
     markThreadRead,
     markActivityRead,

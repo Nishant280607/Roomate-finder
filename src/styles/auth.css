@@ -13,7 +13,7 @@
   gap: 24px;
   padding: 28px clamp(16px, 4vw, 48px) 40px;
   background:
-    linear-gradient(90deg, rgb(0 0 0 / 0.08) 1px, transparent 1px) 0 0 / 22px 100%,
+    linear-gradient(90deg, rgb(0 0 0 / 0.1) 1px, transparent 1px) 0 0 / 22px 100%,
     var(--rail);
   color: var(--door-ink);
   overflow: hidden;
@@ -23,19 +23,97 @@
   justify-self: start;
 }
 
-.door {
+.door-scene {
   position: relative;
   align-self: center;
+  display: grid;
+  justify-items: center;
+}
+
+/* The frame. Its background is the lit hallway you see when the door opens. */
+.door {
+  --frame: color-mix(in srgb, var(--rail) 55%, black);
+  position: relative;
   width: 250px;
   height: 400px;
   border-radius: 125px 125px 4px 4px;
-  background: linear-gradient(90deg, #2c6650, #2a5e4a 60%, #24533f);
-  border: 10px solid #153124;
+  border: 10px solid var(--frame);
   border-bottom-width: 0;
+  overflow: hidden;
+  perspective: 1100px;
+  background: radial-gradient(ellipse 120% 90% at 50% 80%, #fff6dc 0%, #f6d78f 32%, #d9a443 68%, #8a5c17 100%);
   box-shadow:
-    0 0 0 3px #0f2219,
+    0 0 0 3px color-mix(in srgb, var(--rail) 35%, black),
     0 24px 0 -8px var(--brass),
     0 40px 60px -20px rgb(0 0 0 / 0.55);
+}
+
+/* The leaf: the part that swings on its hinge (left edge) */
+.door-leaf {
+  position: absolute;
+  inset: 0;
+  border-radius: 115px 115px 0 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--door) 86%, white),
+    var(--door) 58%,
+    color-mix(in srgb, var(--door) 80%, black)
+  );
+  transform-origin: left center;
+  transition: transform 0.55s cubic-bezier(0.3, 0.7, 0.2, 1);
+  box-shadow: inset -3px 0 0 rgb(0 0 0 / 0.18);
+}
+
+.door.is-ajar .door-leaf {
+  transform: rotateY(16deg);
+}
+
+.door.is-open .door-leaf {
+  transform: rotateY(80deg);
+  transition-duration: 1s;
+}
+
+.door.is-locked .door-leaf {
+  animation: rattle 0.5s ease-in-out;
+}
+
+.door.is-locked .door-knob {
+  animation: jiggle 0.5s ease-in-out;
+}
+
+@keyframes rattle {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: rotateY(4deg) translateX(2px);
+  }
+  40% {
+    transform: rotateY(-1deg) translateX(-2px);
+  }
+  60% {
+    transform: rotateY(3deg) translateX(1px);
+  }
+  80% {
+    transform: rotateY(-1deg);
+  }
+}
+
+@keyframes jiggle {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  25% {
+    rotate: -35deg;
+  }
+  50% {
+    rotate: 20deg;
+  }
+  75% {
+    rotate: -25deg;
+  }
 }
 
 .door-panels {
@@ -50,7 +128,7 @@
   border-radius: 6px;
   box-shadow:
     inset 2px 2px 0 rgb(0 0 0 / 0.22),
-    inset -2px -2px 0 rgb(255 255 255 / 0.08);
+    inset -2px -2px 0 rgb(255 255 255 / 0.09);
 }
 
 .door-panels span:first-child {
@@ -58,7 +136,6 @@
 }
 
 .door-plate {
-  font-size: 1.15rem;
   position: absolute;
   left: 50%;
   top: 150px;
@@ -71,6 +148,7 @@
   border-radius: 4px;
   background: linear-gradient(180deg, #f0cd73, #d4a23a 70%, #c28f2c);
   color: #33250a;
+  font-size: 1.15rem;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.5),
     inset 0 -1px 0 rgb(0 0 0 / 0.25),
@@ -117,10 +195,11 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #f6dc93, #c28f2c 60%, #7d5a15);
+  background: radial-gradient(circle at 32% 30%, #fbe6a6, #c28f2c 58%, #7d5a15);
   box-shadow: 0 3px 4px rgb(0 0 0 / 0.4);
 }
 
+/* Someone's home: a little warm light in the peephole */
 .door-peephole {
   position: absolute;
   left: 50%;
@@ -129,8 +208,32 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #0b1a13;
+  background: radial-gradient(circle, #ffe7a8 0 35%, #2a1e08 75%);
   box-shadow: 0 0 0 3px #c9952f;
+}
+
+/* Light spilling out onto the step when the door opens */
+.door-spill {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 360px;
+  height: 140px;
+  translate: -50% 16px;
+  clip-path: polygon(19% 0, 81% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgb(255 222 150 / 0.55), rgb(255 222 150 / 0));
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.door-scene:has(.is-ajar) .door-spill {
+  opacity: 0.25;
+}
+
+.door-scene:has(.is-open) .door-spill {
+  opacity: 1;
+  transition-duration: 1s;
 }
 
 .door-caption {
@@ -144,6 +247,11 @@
   display: grid;
   place-items: center;
   padding: 40px 16px;
+  transition: opacity 0.5s ease 0.3s;
+}
+
+.auth.is-entering .auth-side {
+  opacity: 0;
 }
 
 .auth-box {
@@ -155,6 +263,13 @@
 .auth-form {
   display: grid;
   gap: 16px;
+}
+
+.auth-waiting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-2);
 }
 
 .field-row-between {
@@ -203,13 +318,20 @@
     height: 176px;
   }
 
-  .door {
+  .door-scene {
     align-self: end;
+  }
+
+  .door {
     width: 170px;
     height: 150px;
     border-radius: 85px 85px 0 0;
     border-width: 7px;
-    box-shadow: 0 0 0 2px #0f2219;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--rail) 35%, black);
+  }
+
+  .door-leaf {
+    border-radius: 78px 78px 0 0;
   }
 
   .door-panels {
@@ -242,6 +364,7 @@
     height: 10px;
   }
 
+  .door-spill,
   .door-caption {
     display: none;
   }

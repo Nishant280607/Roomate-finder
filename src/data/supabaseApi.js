@@ -148,10 +148,11 @@ export function createSupabaseApi(user) {
       return rows.reverse();
     },
 
-    async sendMessage(to, body) {
-      return must(
-        await supabase.from("chat_messages").insert({ sender_id: uid, recipient_id: to, body }).select("*").single(),
-      );
+    async sendMessage(to, body, extra = {}) {
+      const row = { sender_id: uid, recipient_id: to, body };
+      // Plain messages leave kind/payload to their defaults.
+      if (extra.kind && extra.kind !== "text") Object.assign(row, { kind: extra.kind, payload: extra.payload ?? null });
+      return must(await supabase.from("chat_messages").insert(row).select("*").single());
     },
 
     async markRead(fromId) {

@@ -1,28 +1,26 @@
+import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { BrandMark } from "./Bits";
 
-/** Shown when the Supabase project doesn't have the app's tables yet. */
+/** Shown when the app's database hasn't been set up yet. Kept friendly; the fix is logged for the developer. */
 export default function SetupNotice() {
   const { signOut, startDemo } = useAuth();
+
+  useEffect(() => {
+    console.warn(
+      "[RoomieFinder] The database tables are missing. In Supabase, open SQL Editor, paste supabase/schema.sql from the repository and press Run.",
+    );
+  }, []);
+
   return (
     <div className="splash">
       <div className="panel panel-pad setup">
         <BrandMark size={40} />
-        <h1 className="h-section">The database isn't set up yet</h1>
-        <p>
-          You're signed in, but this Supabase project doesn't have RoomieFinder's tables. Someone with access to the project needs to run
-          the setup script once:
-        </p>
-        <ol className="setup-steps">
-          <li>Open your project at supabase.com and go to SQL Editor.</li>
-          <li>
-            Paste the contents of <code>supabase/schema.sql</code> from the repository and press Run.
-          </li>
-          <li>Come back here and refresh the page.</li>
-        </ol>
+        <h1 className="h-section">We're still getting things ready</h1>
+        <p className="muted">Your account is safe. RoomieFinder isn't quite open yet, so please check back a little later.</p>
         <div className="action-row">
           <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
-            I've run it, refresh
+            Try again
           </button>
           <button
             type="button"
@@ -32,7 +30,10 @@ export default function SetupNotice() {
               startDemo();
             }}
           >
-            Explore the demo instead
+            Explore the demo
+          </button>
+          <button type="button" className="btn btn-quiet" onClick={signOut}>
+            Sign out
           </button>
         </div>
       </div>

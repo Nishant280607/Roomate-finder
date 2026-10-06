@@ -1,7 +1,7 @@
 import { DEMO_ME, DEMO_PEOPLE, DEMO_THREADS } from "./demoPeople";
 import { computeMatch } from "../lib/match";
 import { daysFromNow, firstName, parseDate, rentRange } from "../lib/format";
-import { PROFILE_FIELDS } from "../lib/options";
+import { pickPrefs, PROFILE_FIELDS } from "../lib/options";
 
 /*
   A local stand-in for the Supabase backend so the app can be explored
@@ -144,8 +144,17 @@ function pushActivity(kind, actorId) {
   db().activity.unshift({ id: uid(), kind, actor_id: actorId, created_at: new Date().toISOString(), read_at: null });
 }
 
-function addMessage(from, to, body) {
-  const msg = { id: uid(), sender_id: from, recipient_id: to, body, created_at: new Date().toISOString(), read_at: null };
+function addMessage(from, to, body, extra = {}) {
+  const msg = {
+    id: uid(),
+    sender_id: from,
+    recipient_id: to,
+    body,
+    kind: extra.kind || "text",
+    payload: extra.payload ?? null,
+    created_at: new Date().toISOString(),
+    read_at: null,
+  };
   db().messages.push(msg);
   return msg;
 }
@@ -191,14 +200,33 @@ function replyFor(other, text) {
   return generic[said % generic.length];
 }
 
-function scheduleReply(other, text) {
+/** How someone reacts when you share your preferences, and their own card back. */
+function repliesToPrefs(other, shared) {
+  const p = person(other);
+  const score = computeMatch(p, { ...db().me, ...shared }).score;
+  const text =
+    score >= 75
+      ? "Thanks for sharing! We line up on almost everything. Here are mine so you can compare."
+      : score >= 55
+        ? "Thanks! Mostly similar, with a couple of things we should talk about. Here are mine."
+        : "Thanks for sharing. We're different on a few things, but I'm happy to chat. Here are mine.";
+  const alreadyShared = db().messages.some((m) => m.sender_id === other && m.kind === "prefs");
+  const out = [[text, {}]];
+  if (!alreadyShared) out.push(["Shared my preferences", { kind: "prefs", payload: pickPrefs(p) }]);
+  return out;
+}
+
+function scheduleReply(other, text, extra = {}) {
+  const replies = extra.kind === "prefs" ? repliesToPrefs(other, extra.payload || {}) : [[replyFor(other, text), {}]];
   later(1200, () => emit({ type: "typing", from: other }));
-  later(1200 + 2200, () => {
-    const conn = between(other);
-    if (!conn || conn.status !== "accepted") return;
-    const msg = addMessage(other, "me", replyFor(other, text));
-    persist();
-    emit({ type: "message", row: clone(msg) });
+  replies.forEach(([body, more], i) => {
+    later(1200 + 2200 + i * 1400, () => {
+      const conn = between(other);
+      if (!conn || conn.status !== "accepted") return;
+      const msg = addMessage(other, "me", body, more);
+      persist();
+      emit({ type: "message", row: clone(msg) });
+    });
   });
 }
 
@@ -315,10 +343,10 @@ export function createDemoApi() {
     async loadMessages() {
       return clone(db().messages);
     },
-    async sendMessage(to, body) {
+    async sendMessage(to, body, extra = {}) {
       const conn = between(to);
       if (!conn || conn.status !== "accepted") throw new Error("You can only message people you're connected with.");
-      const msg = addMessage("me", to, body);
+      const msg = addMessage("me", to, body, extra);
       persist();
       // They read it shortly before replying.
       later(1000, () => {
@@ -326,7 +354,7 @@ export function createDemoApi() {
         persist();
         emit({ type: "message-update", row: clone(msg) });
       });
-      scheduleReply(to, body);
+      scheduleReply(to, body, extra);
       return clone(msg);
     },
     async markRead(fromId) {

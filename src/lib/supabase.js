@@ -18,7 +18,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: "pkce",
   },
 });
 
@@ -34,15 +33,4 @@ export function isMissingSchema(error) {
     code === "42883" ||
     /does not exist|could not find the (table|function)/i.test(message)
   );
-}
-
-/** Checks, without signing in, whether the database has been set up. */
-export async function checkBackend() {
-  try {
-    const { error } = await supabase.from("members").select("id", { head: true, count: "exact" }).limit(1);
-    if (!error) return "ready";
-    return isMissingSchema(error) ? "missing-schema" : "error";
-  } catch {
-    return "unreachable";
-  }
 }

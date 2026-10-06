@@ -23,10 +23,10 @@ export function RequireAuth({ children }) {
 }
 
 export function PublicOnly({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading, holding } = useAuth();
   const location = useLocation();
   if (loading) return <Splash />;
-  if (user) return <Navigate to={location.state?.from || "/home"} replace />;
+  if (user && !holding) return <Navigate to={location.state?.from || "/home"} replace />;
   return children;
 }
 

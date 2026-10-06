@@ -145,3 +145,11 @@ export function ageLine(person) {
   if (person.occupation) bits.push(person.occupation);
   return bits.join(", ");
 }
+
+/** One-line preview of a message for conversation lists. */
+export function messagePreview(message, meId) {
+  if (!message) return "";
+  const mine = message.sender_id === meId;
+  if (message.kind === "prefs") return mine ? "You shared your preferences" : "Shared their preferences";
+  return `${mine ? "You: " : ""}${message.body}`;
+}

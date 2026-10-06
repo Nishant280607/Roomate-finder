@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { initials } from "../lib/format";
 import { matchWord } from "../lib/match";
 
-const TINTS = ["#1e4636", "#7a4b2a", "#2d4a7a", "#7a2d4f", "#4a5d23", "#5b3a7a", "#21616b", "#8a5a12", "#6b2f2f"];
+const TINTS = ["#22346a", "#7a4b2a", "#2d4a7a", "#7a2d4f", "#4a5d23", "#5b3a7a", "#21616b", "#8a5a12", "#6b2f2f"];
 
 function tintFor(id = "") {
   let h = 0;
@@ -83,7 +83,7 @@ export function Splash({ text = "Opening the door" }) {
   );
 }
 
-export function ConfirmDialog({ open, title, children, confirmLabel, tone = "primary", busy, onConfirm, onClose, confirmDisabled }) {
+export function ConfirmDialog({ open, title, children, confirmLabel, tone = "primary", busy, onConfirm, onClose, confirmDisabled, wide }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, tone = "pri
   }, [open]);
 
   return (
-    <dialog ref={ref} className="dialog" onClose={onClose} onCancel={onClose} aria-labelledby="dialog-title">
+    <dialog ref={ref} className={`dialog ${wide ? "dialog-wide" : ""}`} onClose={onClose} onCancel={onClose} aria-labelledby="dialog-title">
       <form
         method="dialog"
         className="dialog-body"

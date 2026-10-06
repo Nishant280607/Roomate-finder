@@ -77,9 +77,17 @@ create table if not exists public.chat_messages (
   sender_id     uuid not null references public.members (id) on delete cascade,
   recipient_id  uuid not null references public.members (id) on delete cascade,
   body          text not null check (char_length(btrim(body)) between 1 and 2000),
+  kind          text not null default 'text' check (kind in ('text', 'prefs')),
+  payload       jsonb check (payload is null or pg_column_size(payload) <= 4096),
   created_at    timestamptz not null default now(),
   read_at       timestamptz
 );
+
+-- For databases created before preference cards existed.
+alter table public.chat_messages
+  add column if not exists kind text not null default 'text' check (kind in ('text', 'prefs'));
+alter table public.chat_messages
+  add column if not exists payload jsonb check (payload is null or pg_column_size(payload) <= 4096);
 
 create index if not exists chat_messages_recipient_idx on public.chat_messages (recipient_id, created_at desc);
 create index if not exists chat_messages_sender_idx on public.chat_messages (sender_id, created_at desc);

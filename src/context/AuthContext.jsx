@@ -24,23 +24,43 @@ function writeDemoFlag(on) {
   }
 }
 
-/** Asks Supabase which sign-in providers are switched on (null if unknown). */
-async function isProviderEnabled(provider) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_KEY } });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return Boolean(json?.external?.[provider]);
-  } catch {
-    return null;
+let providersPromise = null;
+
+/** Asks the sign-in service which providers are switched on. Resolves to null if it can't tell. */
+function loadProviders() {
+  if (!providersPromise) {
+    providersPromise = fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_KEY } })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => json?.external ?? null)
+      .catch(() => null);
   }
+  return providersPromise;
 }
+
+// Setup hints go to the browser console only, never on screen.
+const GOOGLE_SETUP_HINT =
+  "[RoomieFinder] Google sign-in is off, so the Google buttons are hidden. Turn it on in Supabase: Authentication → Sign In / Providers → Google.";
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [demo, setDemo] = useState(readDemoFlag);
   const [recovery, setRecovery] = useState(false);
+  // While the door-opening animation plays, sign-in pages hold off redirecting.
+  const [holding, setHolding] = useState(false);
+  const [googleEnabled, setGoogleEnabled] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+    loadProviders().then((external) => {
+      if (!alive || !external) return;
+      setGoogleEnabled(Boolean(external.google));
+      if (!external.google) console.warn(GOOGLE_SETUP_HINT);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -72,8 +92,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    const enabled = await isProviderEnabled("google");
-    if (enabled === false) throw new Error(GOOGLE_OFF_MESSAGE);
+    const external = await loadProviders();
+    if (external && !external.google) {
+      console.warn(GOOGLE_SETUP_HINT);
+      throw new Error(GOOGLE_OFF_MESSAGE);
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -119,6 +142,9 @@ export function AuthProvider({ children }) {
     setRecovery(false);
   }, []);
 
+  const hold = useCallback(() => setHolding(true), []);
+  const release = useCallback(() => setHolding(false), []);
+
   const startDemo = useCallback(() => {
     writeDemoFlag(true);
     setDemo(true);
@@ -146,6 +172,10 @@ export function AuthProvider({ children }) {
       provider: demo ? "demo" : (user?.app_metadata?.provider ?? null),
       loading: demo ? false : loading,
       recovery,
+      holding,
+      hold,
+      release,
+      googleEnabled,
       signInWithGoogle,
       signInWithEmail,
       signUpWithEmail,
@@ -154,7 +184,7 @@ export function AuthProvider({ children }) {
       startDemo,
       signOut,
     };
-  }, [demo, session, loading, recovery, signInWithGoogle, signInWithEmail, signUpWithEmail, sendPasswordReset, updatePassword, startDemo, signOut]);
+  }, [demo, session, loading, recovery, holding, hold, release, googleEnabled, signInWithGoogle, signInWithEmail, signUpWithEmail, sendPasswordReset, updatePassword, startDemo, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

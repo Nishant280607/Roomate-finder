@@ -263,6 +263,108 @@
   background: var(--paper);
 }
 
+.composer-tool {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+
+/* Preference cards posted in a conversation */
+.card-bubble {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 340px);
+}
+
+.card-bubble time {
+  font-size: 0.7rem;
+  color: var(--ink-3);
+}
+
+.mine .card-bubble time {
+  text-align: right;
+}
+
+.card-bubble.is-pending {
+  opacity: 0.65;
+}
+
+.card-bubble.is-failed .prefs-card {
+  border-color: var(--brick);
+}
+
+.prefs-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--brass);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.mine .prefs-card {
+  border-top-color: var(--door);
+}
+
+.prefs-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-stretch: var(--semi-wide);
+  font-weight: 700;
+}
+
+.prefs-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.prefs-list > div {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.prefs-list dt {
+  color: var(--ink-3);
+}
+
+.prefs-list dd {
+  margin: 0;
+  font-weight: 560;
+}
+
+.prefs-habits {
+  padding-top: 10px;
+  border-top: 1px solid var(--line-2);
+}
+
+.prefs-same {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--ok);
+  white-space: nowrap;
+}
+
+.share-edit {
+  display: grid;
+  gap: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-2);
+}
+
+.share-edit-toggle {
+  justify-self: start;
+}
+
 .composer-input {
   min-height: 44px;
   max-height: 160px;
