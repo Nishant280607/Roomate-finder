@@ -152,8 +152,8 @@ export function AuthProvider({ children }) {
 
   const sendPasswordReset = useCallback(async (email) => {
     const status = await emailStatus(email);
+    // Google accounts can get a code too, so they can add a password as a backup.
     if (status === "none") throw friendly(MESSAGES.noAccount);
-    if (status === "google") throw friendly(MESSAGES.googleNoPassword);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });

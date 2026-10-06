@@ -4,6 +4,7 @@ import { Bell, Check } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Avatar, Brand, GoogleMark, MatchPlate } from "../components/Bits";
+import AccountChip from "../components/AccountChip";
 import { DEMO_ME, DEMO_PEOPLE } from "../data/demoPeople";
 import { computeMatch } from "../lib/match";
 import { daysFromNow, rentRange } from "../lib/format";
@@ -118,9 +119,12 @@ export default function Landing() {
         <Brand tone="light" />
         <nav className="landing-nav-links">
           {user ? (
-            <Link to="/home" className="btn btn-brass btn-sm">
-              Open app
-            </Link>
+            <>
+              <AccountChip />
+              <Link to="/home" className="btn btn-brass btn-sm">
+                Open app
+              </Link>
+            </>
           ) : (
             <>
               <Link to="/login" className="landing-signin">

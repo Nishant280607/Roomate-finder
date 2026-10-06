@@ -326,22 +326,29 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Profile photos (Storage bucket "avatars", one folder per member)
 -- ---------------------------------------------------------------------------
-insert into storage.buckets (id, name, public)
-values ('avatars', 'avatars', true)
-on conflict (id) do nothing;
+-- Wrapped so that, if this project doesn't allow it, the rest of the setup still works.
+do $do$
+begin
+  insert into storage.buckets (id, name, public)
+  values ('avatars', 'avatars', true)
+  on conflict (id) do nothing;
 
-drop policy if exists "rf avatars read" on storage.objects;
-create policy "rf avatars read" on storage.objects for select
-  using (bucket_id = 'avatars');
+  drop policy if exists "rf avatars read" on storage.objects;
+  create policy "rf avatars read" on storage.objects for select
+    using (bucket_id = 'avatars');
 
-drop policy if exists "rf avatars upload" on storage.objects;
-create policy "rf avatars upload" on storage.objects for insert to authenticated
-  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+  drop policy if exists "rf avatars upload" on storage.objects;
+  create policy "rf avatars upload" on storage.objects for insert to authenticated
+    with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
-drop policy if exists "rf avatars change" on storage.objects;
-create policy "rf avatars change" on storage.objects for update to authenticated
-  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+  drop policy if exists "rf avatars change" on storage.objects;
+  create policy "rf avatars change" on storage.objects for update to authenticated
+    using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
-drop policy if exists "rf avatars delete" on storage.objects;
-create policy "rf avatars delete" on storage.objects for delete to authenticated
-  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+  drop policy if exists "rf avatars delete" on storage.objects;
+  create policy "rf avatars delete" on storage.objects for delete to authenticated
+    using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+exception when others then
+  raise notice 'Skipped profile photo storage setup: %', sqlerrm;
+end;
+$do$;

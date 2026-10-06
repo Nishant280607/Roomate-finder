@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useStore } from "../context/StoreContext";
 import { Avatar, Brand, Splash } from "./Bits";
 import SetupNotice from "./SetupNotice";
+import AccountChip from "./AccountChip";
 
 const NAV = [
   { to: "/home", label: "Home", icon: House },
@@ -40,7 +41,12 @@ export function AppGate({ children }) {
   if (status === "needs-setup") return <SetupNotice />;
   if (status === "error") {
     return (
-      <div className="splash">
+      <div className="gate">
+        <header className="gate-top">
+          <Brand />
+          <AccountChip />
+        </header>
+        <div className="splash">
         <div className="panel panel-pad gate-error">
           <h1 className="h-section">Couldn't load your account</h1>
           <p className="muted">{loadError}</p>
@@ -52,6 +58,7 @@ export function AppGate({ children }) {
               Sign out
             </button>
           </div>
+        </div>
         </div>
       </div>
     );
@@ -134,13 +141,14 @@ export function AppShell() {
           <Link to="/settings" className="icon-btn" aria-label="Settings">
             <Settings size={18} aria-hidden />
           </Link>
-          <Link to="/profile" aria-label="Your profile" className="topbar-me">
-            <Avatar person={me} size={36} />
-          </Link>
+          <AccountChip me={me} showProfile compact />
         </div>
       </header>
 
       <main id="main" className="main">
+        <div className="main-top">
+          <AccountChip me={me} showProfile />
+        </div>
         {mode === "demo" && (
           <div className="demo-strip">
             <span>You're exploring with sample profiles. Nothing here is shared.</span>

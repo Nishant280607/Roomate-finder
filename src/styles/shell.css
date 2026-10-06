@@ -315,3 +315,137 @@ code {
     padding: 0;
   }
 }
+
+/* ---------- Who is signed in ---------- */
+.account {
+  position: relative;
+}
+
+.account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 240px;
+  padding: 3px 14px 3px 3px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.account-chip.is-compact {
+  padding: 3px;
+}
+
+.account-chip:hover {
+  border-color: var(--ink-3);
+}
+
+.account-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 60;
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  min-width: 240px;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.35);
+}
+
+.account-who {
+  display: grid;
+  gap: 1px;
+  padding: 6px 10px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.account-who span {
+  color: var(--ink-3);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.account-who .account-label {
+  font-size: 0.75rem;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font-weight: 550;
+  text-align: left;
+  text-decoration: none;
+}
+
+.account-item:hover {
+  background: var(--paper-2);
+}
+
+.landing-nav .account-chip {
+  background: transparent;
+  color: var(--door-ink);
+  border-color: rgb(255 255 255 / 0.28);
+}
+
+.main-top {
+  display: flex;
+  justify-content: flex-end;
+  margin: -16px 0 14px;
+}
+
+.gate {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.gate-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px clamp(16px, 4vw, 40px);
+}
+
+.gate .splash {
+  min-height: 0;
+}
+
+@media (max-width: 899px) {
+  .main-top {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-nav .account-name {
+    display: none;
+  }
+
+  .landing-nav .account-chip {
+    padding: 3px;
+  }
+}

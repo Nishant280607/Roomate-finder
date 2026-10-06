@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { BrandMark } from "./Bits";
+import { Brand, BrandMark } from "./Bits";
+import AccountChip from "./AccountChip";
 
 /** Shown when the app's database hasn't been set up yet. Kept friendly; the fix is logged for the developer. */
 export default function SetupNotice() {
@@ -13,7 +14,12 @@ export default function SetupNotice() {
   }, []);
 
   return (
-    <div className="splash">
+    <div className="gate">
+      <header className="gate-top">
+        <Brand />
+        <AccountChip />
+      </header>
+      <div className="splash">
       <div className="panel panel-pad setup">
         <BrandMark size={40} />
         <h1 className="h-section">We're still getting things ready</h1>
@@ -36,6 +42,7 @@ export default function SetupNotice() {
             Sign out
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
