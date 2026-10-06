@@ -1,5 +1,6 @@
 // Everything here is shown to people signing in, so it says exactly what
 // happened in plain words. Raw errors go to the browser console only.
+import { SUPABASE_URL } from "./supabase";
 
 export const GOOGLE_OFF_MESSAGE = "Google sign-in isn't available right now. Please use your email instead.";
 
@@ -11,8 +12,19 @@ export const MESSAGES = {
   alreadyRegistered: "This email is already registered. Sign in instead.",
   alreadyRegisteredGoogle: "This email is already registered with Google. Use the Google button instead.",
   googleNoPassword: "This email signs in with Google, so it has no password to reset. Use Continue with Google.",
-  offline: "No internet connection. Check your connection and try again.",
+  offline: "You're offline. Check your internet connection and try again.",
+  unreachable: "We can't connect to RoomieFinder right now. Please try again in a few minutes.",
 };
+
+/** For network failures: offline, or online but the server can't be reached. */
+export function connectionMessage() {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return MESSAGES.offline;
+  console.warn(
+    `[RoomieFinder] Couldn't reach ${SUPABASE_URL}. Check that the Supabase project is running (not paused) and that this URL matches your project. ` +
+      "Some networks block supabase.co: try another network, or set your DNS to 1.1.1.1.",
+  );
+  return MESSAGES.unreachable;
+}
 
 /** An error whose message is already written for people, not developers. */
 export class FriendlyError extends Error {}
@@ -61,7 +73,6 @@ const BY_MESSAGE = [
   [/email address .* is invalid|invalid format|invalid email/i, BY_CODE.email_address_invalid],
   [/signups? (not allowed|disabled)/i, BY_CODE.signup_disabled],
   [/provider is not enabled|unsupported provider/i, GOOGLE_OFF_MESSAGE],
-  [/failed to fetch|networkerror|load failed|network request failed/i, MESSAGES.offline],
   [/expired|invalid flow state|code verifier/i, "This link has expired. Please try again."],
 ];
 
@@ -71,11 +82,13 @@ export function friendlyAuthError(error, fallback = "We couldn't do that right n
   const code = String(error?.code || "");
   if (message) console.error("[RoomieFinder] sign-in error:", code || "", message);
 
+  if (/failed to fetch|networkerror|load failed|network request failed/i.test(message) || error?.name === "AuthRetryableFetchError") {
+    return connectionMessage();
+  }
   const wait = message.match(/after (\d+) seconds?/i);
   if (wait) return `Please wait ${wait[1]} seconds before trying again.`;
   if (BY_CODE[code]) return BY_CODE[code];
   for (const [pattern, text] of BY_MESSAGE) if (pattern.test(message)) return text;
-  if (error?.name === "AuthRetryableFetchError") return MESSAGES.offline;
   return fallback;
 }
 

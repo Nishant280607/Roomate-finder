@@ -4,7 +4,7 @@ import { useToast } from "./ToastContext";
 import { createDemoApi } from "../data/demoApi";
 import { createSupabaseApi } from "../data/supabaseApi";
 import { isMissingSchema } from "../lib/supabase";
-import { MESSAGES } from "../lib/authErrors";
+import { connectionMessage } from "../lib/authErrors";
 import { computeMatch, fitsPreference } from "../lib/match";
 import { firstName } from "../lib/format";
 
@@ -27,7 +27,7 @@ function errorText(error, fallback = "That didn't work.") {
   const message = String(error?.message || error || "");
   const code = String(error?.code || "");
   if (message) console.error("[RoomieFinder]", code, message);
-  if (/failed to fetch|networkerror|load failed|network request failed/i.test(message)) return MESSAGES.offline;
+  if (/failed to fetch|networkerror|load failed|network request failed/i.test(message)) return connectionMessage();
   if (/jwt expired|session.*expired|refresh token/i.test(message) || code === "PGRST301") return "Your session has expired. Please sign in again.";
   if (/row-level security|permission denied/i.test(message) || code === "42501") return `${fallback} You need to be connected with this person first.`;
   if (code === "23514" || /violates check constraint/i.test(message)) {
