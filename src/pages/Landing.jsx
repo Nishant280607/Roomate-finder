@@ -77,7 +77,7 @@ function Intercom() {
 }
 
 export default function Landing() {
-  const { user, signInWithGoogle, startDemo, googleEnabled } = useAuth();
+  const { user, signInWithGoogle, startDemo } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -103,15 +103,9 @@ export default function Landing() {
     </Link>
   ) : (
     <>
-      {googleEnabled === false ? (
-        <Link to="/signup" className="btn btn-brass btn-lg">
-          Create your account
-        </Link>
-      ) : (
-        <button type="button" className="btn btn-google btn-lg" onClick={google} disabled={busy}>
-          <GoogleMark /> Continue with Google
-        </button>
-      )}
+      <button type="button" className="btn btn-google btn-lg" onClick={google} disabled={busy}>
+        <GoogleMark /> Continue with Google
+      </button>
       <button type="button" className="btn btn-quiet-light btn-lg" onClick={demo}>
         Explore the demo
       </button>

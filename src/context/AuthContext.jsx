@@ -39,7 +39,7 @@ function loadProviders() {
 
 // Setup hints go to the browser console only, never on screen.
 const GOOGLE_SETUP_HINT =
-  "[RoomieFinder] Google sign-in is off, so the Google buttons are hidden. Turn it on in Supabase: Authentication → Sign In / Providers → Google.";
+  "[RoomieFinder] Google sign-in is off, so the Google buttons won't work yet. Turn it on in Supabase: Authentication → Sign In / Providers → Google.";
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);

@@ -80,12 +80,11 @@ function Notice({ tone = "error", children }) {
   );
 }
 
-/** Google button plus the "or" divider. Hidden until Google sign-in is switched on. */
+/** "Continue with Google" plus the "or" divider. */
 function GoogleBlock({ label, divider, door }) {
-  const { signInWithGoogle, googleEnabled } = useAuth();
+  const { signInWithGoogle } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  if (googleEnabled === false) return null;
   return (
     <>
       <button
