@@ -185,6 +185,8 @@ export default function Landing() {
         <nav className="landing-foot-links">
           <Link to="/login">Sign in</Link>
           <Link to="/signup">Create account</Link>
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/terms">Terms</Link>
           <button type="button" className="linklike" onClick={demo}>
             Demo
           </button>

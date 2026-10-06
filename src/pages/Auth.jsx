@@ -377,6 +377,9 @@ export function Signup() {
           {busy && <span className="spinner" aria-hidden />} Create account
         </button>
       </form>
+      <p className="field-hint">
+        By creating an account you agree to the <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy policy</Link>.
+      </p>
       <p className="auth-foot">
         Already have an account? <Link to="/login">Sign in</Link>, or <DemoLink onClick={() => walkIn(async () => startDemo())} />.
       </p>

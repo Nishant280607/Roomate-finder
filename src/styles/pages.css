@@ -1145,3 +1145,42 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 .danger-block {
   border-color: color-mix(in srgb, var(--brick) 35%, transparent);
 }
+
+/* ---------- Privacy and terms ---------- */
+.legal {
+  min-height: 100dvh;
+  background: var(--plaster);
+}
+
+.legal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px clamp(16px, 4vw, 40px);
+}
+
+.legal-body {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: 16px 16px 72px;
+  display: grid;
+  gap: 14px;
+  line-height: 1.65;
+}
+
+.legal-body h2 {
+  margin-top: 14px;
+}
+
+.legal-body ul {
+  list-style: disc;
+  padding-left: 22px;
+  display: grid;
+  gap: 6px;
+}
+
+.legal-body a {
+  color: var(--door);
+  font-weight: 600;
+}

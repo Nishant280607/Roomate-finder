@@ -16,6 +16,7 @@ import Saved from "./pages/Saved";
 import Activity from "./pages/Activity";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import { Privacy, Terms } from "./pages/Legal";
 
 function Providers() {
   return (
@@ -61,6 +62,8 @@ const router = createBrowserRouter([
       { path: "/signup", element: <PublicOnly><Signup /></PublicOnly> },
       { path: "/auth/callback", element: <AuthCallback /> },
       { path: "/reset-password", element: <ResetPassword /> },
+      { path: "/privacy", element: <Privacy /> },
+      { path: "/terms", element: <Terms /> },
       {
         element: <SignedIn />,
         children: [
