@@ -8,10 +8,9 @@ export const MESSAGES = {
   noAccount: "There's no account with this email. Check it for typos, or create an account.",
   wrongPassword: "Incorrect password. Try again, or use Forgot password.",
   wrongEmailOrPassword: "Incorrect email or password.",
-  usesGoogle: "This email is registered with Google. Use Continue with Google instead.",
+  usesGoogle: "This email is registered with Google. Use Continue with Google, or set a password with Forgot password.",
   alreadyRegistered: "This email is already registered. Sign in instead.",
   alreadyRegisteredGoogle: "This email is already registered with Google. Use the Google button instead.",
-  googleNoPassword: "This email signs in with Google, so it has no password to reset. Use Continue with Google.",
   offline: "You're offline. Check your internet connection and try again.",
   unreachable: "We can't connect to RoomieFinder right now. Please try again in a few minutes.",
 };
