@@ -98,7 +98,7 @@ function GoogleBlock({ label, divider, door }) {
           try {
             await signInWithGoogle();
           } catch (e) {
-            setError(friendlyAuthError(e));
+            setError(friendlyAuthError(e, "Google sign-in didn't start. Please try again."));
             door.rattle();
             setBusy(false);
           }
@@ -204,7 +204,7 @@ function ForgotPassword({ initialEmail, onBack }) {
       setCode("");
       setCooldown(60);
     } catch (err) {
-      setError(friendlyAuthError(err));
+      setError(friendlyAuthError(err, "We couldn't send the code right now. Please try again."));
       door.rattle();
     } finally {
       setBusy(false);
@@ -230,7 +230,7 @@ function ForgotPassword({ initialEmail, onBack }) {
         await updatePassword(password);
       });
     } catch (err) {
-      setError(friendlyAuthError(err));
+      setError(friendlyAuthError(err, "We couldn't reset your password right now. Please try again."));
       setBusy(false);
     }
   }
@@ -263,7 +263,7 @@ function ForgotPassword({ initialEmail, onBack }) {
     <AuthFrame plate="Almost in" caption="Type the code from your email and choose a new password." door={doorState}>
       <h1 className="h-page">Check your email</h1>
       <p className="muted">
-        If there's an account for <strong>{email.trim()}</strong>, we've sent it a code. The email also has a link you can use instead.
+        We've sent a 6-digit code to <strong>{email.trim()}</strong>. The email also has a link you can use instead.
       </p>
       <form className="auth-form" onSubmit={resetWithCode} noValidate>
         <label className="field">
@@ -335,7 +335,7 @@ export function Login() {
     try {
       await walkIn(() => signInWithEmail(email.trim(), password));
     } catch (err) {
-      setError(friendlyAuthError(err));
+      setError(friendlyAuthError(err, "We couldn't sign you in right now. Please try again."));
       setBusy(false);
     }
   }
@@ -430,7 +430,7 @@ export function Signup() {
         setBusy(false);
       }
     } catch (err) {
-      setError(friendlyAuthError(err));
+      setError(friendlyAuthError(err, "We couldn't create your account right now. Please try again."));
       setBusy(false);
     }
   }
@@ -585,7 +585,7 @@ export function ResetPassword() {
             await door.swingOpen();
             navigate("/home", { replace: true });
           } catch (err) {
-            setError(friendlyAuthError(err));
+            setError(friendlyAuthError(err, "We couldn't save your new password. Please try again."));
             door.rattle();
             setBusy(false);
           }

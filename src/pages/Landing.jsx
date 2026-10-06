@@ -87,7 +87,7 @@ export default function Landing() {
     try {
       await signInWithGoogle();
     } catch (e) {
-      toast.error(friendlyAuthError(e));
+      toast.error(friendlyAuthError(e, "Google sign-in didn't start. Please try again."));
       setBusy(false);
     }
   }

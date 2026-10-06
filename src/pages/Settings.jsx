@@ -68,7 +68,7 @@ export default function Settings() {
                 setPassword("");
                 toast("Password changed");
               } catch (err) {
-                toast.error(friendlyAuthError(err));
+                toast.error(friendlyAuthError(err, "We couldn't change your password. Please try again."));
               } finally {
                 setPwBusy(false);
               }
