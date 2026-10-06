@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../context/StoreContext";
-import { useAuth } from "../context/AuthContext";
 import { Brand } from "../components/Bits";
+import AccountChip from "../components/AccountChip";
 import { AboutFields, BasicsFields, DailyLifeFields, PhotoField, SearchFields } from "../components/ProfileFields";
 import { defaultMoveIn, validateProfile } from "../lib/validate";
 import { EMPTY_PROFILE } from "../lib/options";
@@ -17,7 +17,6 @@ const STEPS = [
 
 export default function Onboarding() {
   const { me, saveProfile, uploadAvatar } = useStore();
-  const { signOut } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -65,9 +64,7 @@ export default function Onboarding() {
     <div className="onboard">
       <header className="onboard-top">
         <Brand to="/welcome" />
-        <button type="button" className="btn btn-quiet btn-sm" onClick={signOut}>
-          Sign out
-        </button>
+        <AccountChip me={me} />
       </header>
 
       <main className="onboard-main">
