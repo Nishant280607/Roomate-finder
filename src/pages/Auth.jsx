@@ -167,16 +167,159 @@ function DemoLink({ onClick }) {
   );
 }
 
-export function Login() {
-  const { signInWithEmail, sendPasswordReset, startDemo } = useAuth();
+/** Forgot password: email → 6-digit code from the email + new password → signed in. */
+function ForgotPassword({ initialEmail, onBack }) {
+  const { sendPasswordReset, verifyRecoveryCode, updatePassword } = useAuth();
   const door = useDoor();
   const walkIn = useWalkIn(door);
-  const [mode, setMode] = useState("signin");
+  const [email, setEmail] = useState(initialEmail);
+  const [step, setStep] = useState("email");
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (!cooldown) return undefined;
+    const t = setTimeout(() => setCooldown((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  const token = code.replace(/\s/g, "");
+  const ready = step === "email" ? EMAIL_RE.test(email.trim()) : /^\d{6,10}$/.test(token) && password.length >= 8;
+  const doorState = door.moment || (ready || busy ? "ajar" : "closed");
+
+  async function sendCode(e) {
+    e?.preventDefault();
+    setError("");
+    if (!EMAIL_RE.test(email.trim())) {
+      door.rattle();
+      return setError("Enter a valid email address.");
+    }
+    setBusy(true);
+    try {
+      await sendPasswordReset(email.trim());
+      setStep("code");
+      setCode("");
+      setCooldown(60);
+    } catch (err) {
+      setError(friendlyAuthError(err));
+      door.rattle();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resetWithCode(e) {
+    e.preventDefault();
+    setError("");
+    const problem = !/^\d{6,10}$/.test(token)
+      ? "Enter the code from the email."
+      : password.length < 8
+        ? "Use a new password with at least 8 characters."
+        : "";
+    if (problem) {
+      door.rattle();
+      return setError(problem);
+    }
+    setBusy(true);
+    try {
+      await walkIn(async () => {
+        await verifyRecoveryCode(email.trim(), token);
+        await updatePassword(password);
+      });
+    } catch (err) {
+      setError(friendlyAuthError(err));
+      setBusy(false);
+    }
+  }
+
+  if (step === "email") {
+    return (
+      <AuthFrame plate="Locked out?" caption="It happens. We'll email you a code to set a new password." door={doorState}>
+        <h1 className="h-page">Reset your password</h1>
+        <p className="muted">Enter the email you signed up with. We'll send you a 6-digit code.</p>
+        <form className="auth-form" onSubmit={sendCode} noValidate>
+          <label className="field">
+            <span className="field-label">Email</span>
+            <input className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </label>
+          {error && <Notice>{error}</Notice>}
+          <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy}>
+            {busy && <span className="spinner" aria-hidden />} Send code
+          </button>
+        </form>
+        <p className="auth-foot">
+          <button type="button" className="text-link" onClick={onBack}>
+            Back to sign in
+          </button>
+        </p>
+      </AuthFrame>
+    );
+  }
+
+  return (
+    <AuthFrame plate="Almost in" caption="Type the code from your email and choose a new password." door={doorState}>
+      <h1 className="h-page">Check your email</h1>
+      <p className="muted">
+        If there's an account for <strong>{email.trim()}</strong>, we've sent it a code. The email also has a link you can use instead.
+      </p>
+      <form className="auth-form" onSubmit={resetWithCode} noValidate>
+        <label className="field">
+          <span className="field-label">Code from the email</span>
+          <input
+            className="input code-input num"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={10}
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/[^\d\s]/g, ""))}
+            required
+          />
+        </label>
+        <div className="field">
+          <label className="field-label" htmlFor="reset-password">
+            New password
+          </label>
+          <PasswordInput id="reset-password" value={password} onChange={setPassword} autoComplete="new-password" />
+          <span className="field-hint">At least 8 characters.</span>
+        </div>
+        {error && <Notice>{error}</Notice>}
+        <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy}>
+          {busy && <span className="spinner" aria-hidden />} Reset password and sign in
+        </button>
+      </form>
+      <p className="auth-foot">
+        Didn't get it? Check your spam folder, or{" "}
+        <button type="button" className="text-link" disabled={cooldown > 0 || busy} onClick={() => sendCode()}>
+          {cooldown > 0 ? `send a new code in ${cooldown}s` : "send a new code"}
+        </button>
+        .{" "}
+        <button
+          type="button"
+          className="text-link"
+          onClick={() => {
+            setStep("email");
+            setError("");
+          }}
+        >
+          Use a different email
+        </button>
+      </p>
+    </AuthFrame>
+  );
+}
+
+export function Login() {
+  const { signInWithEmail, startDemo } = useAuth();
+  const door = useDoor();
+  const walkIn = useWalkIn(door);
+  const [forgot, setForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [sent, setSent] = useState(false);
 
   const ready = EMAIL_RE.test(email.trim()) && password.length > 0;
   const doorState = door.moment || (ready || busy ? "ajar" : "closed");
@@ -189,17 +332,6 @@ export function Login() {
       return setError("Enter a valid email address.");
     }
     setBusy(true);
-    if (mode === "reset") {
-      try {
-        await sendPasswordReset(email.trim());
-        setSent(true);
-      } catch (err) {
-        setError(friendlyAuthError(err));
-      } finally {
-        setBusy(false);
-      }
-      return;
-    }
     try {
       await walkIn(() => signInWithEmail(email.trim(), password));
     } catch (err) {
@@ -208,40 +340,15 @@ export function Login() {
     }
   }
 
-  if (mode === "reset") {
+  if (forgot) {
     return (
-      <AuthFrame plate="Locked out?" caption="It happens. We'll send you a link to set a new password.">
-        <h1 className="h-page">Reset your password</h1>
-        {sent ? (
-          <Notice tone="ok">
-            If there's an account for <strong>{email.trim()}</strong>, a reset link is on its way. It works once and expires in an hour.
-          </Notice>
-        ) : (
-          <form className="auth-form" onSubmit={submit} noValidate>
-            <label className="field">
-              <span className="field-label">Email</span>
-              <input className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </label>
-            {error && <Notice>{error}</Notice>}
-            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy}>
-              {busy && <span className="spinner" aria-hidden />} Send reset link
-            </button>
-          </form>
-        )}
-        <p className="auth-foot">
-          <button
-            type="button"
-            className="text-link"
-            onClick={() => {
-              setMode("signin");
-              setSent(false);
-              setError("");
-            }}
-          >
-            Back to sign in
-          </button>
-        </p>
-      </AuthFrame>
+      <ForgotPassword
+        initialEmail={email}
+        onBack={() => {
+          setForgot(false);
+          setError("");
+        }}
+      />
     );
   }
 
@@ -263,7 +370,7 @@ export function Login() {
               type="button"
               className="text-link small"
               onClick={() => {
-                setMode("reset");
+                setForgot(true);
                 setError("");
               }}
             >

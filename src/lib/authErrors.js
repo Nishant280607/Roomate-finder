@@ -2,7 +2,8 @@
 export const GOOGLE_OFF_MESSAGE = "Google sign-in isn't available right now. Please use your email instead.";
 
 const RULES = [
-  [/invalid login credentials/i, "That email and password don't match an account. Check them, or create an account."],
+  [/invalid login credentials/i, "That email and password don't match. If you signed up with Google, use Continue with Google, or reset your password."],
+  [/token has expired or is invalid|otp_expired|invalid otp/i, "That code is wrong or has expired. Check it, or send a new code."],
   [/email not confirmed/i, "Confirm your email first. We sent a link to your inbox when you signed up."],
   [/user already registered|already been registered/i, "There's already an account with this email. Sign in instead."],
   [/password should be|weak password/i, "Use a stronger password with at least 8 characters."],

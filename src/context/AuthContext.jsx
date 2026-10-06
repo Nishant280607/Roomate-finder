@@ -136,6 +136,12 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   }, []);
 
+  /** Checks the code from a password-reset email. On success the person is signed in. */
+  const verifyRecoveryCode = useCallback(async (email, token) => {
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: "recovery" });
+    if (error) throw error;
+  }, []);
+
   const updatePassword = useCallback(async (password) => {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
@@ -180,11 +186,12 @@ export function AuthProvider({ children }) {
       signInWithEmail,
       signUpWithEmail,
       sendPasswordReset,
+      verifyRecoveryCode,
       updatePassword,
       startDemo,
       signOut,
     };
-  }, [demo, session, loading, recovery, holding, hold, release, googleEnabled, signInWithGoogle, signInWithEmail, signUpWithEmail, sendPasswordReset, updatePassword, startDemo, signOut]);
+  }, [demo, session, loading, recovery, holding, hold, release, googleEnabled, signInWithGoogle, signInWithEmail, signUpWithEmail, sendPasswordReset, verifyRecoveryCode, updatePassword, startDemo, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
