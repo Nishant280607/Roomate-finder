@@ -54,7 +54,10 @@ async function fetchEverything(api) {
     ]);
     return { status: "ready", data: { me, members, connections, saved, messages, activity } };
   } catch (error) {
-    if (isMissingSchema(error)) return { status: "needs-setup" };
+    if (isMissingSchema(error)) {
+      console.warn("[RoomieFinder] Database tables not found. Run supabase/schema.sql in the Supabase SQL Editor.", error?.code, error?.message);
+      return { status: "needs-setup" };
+    }
     return { status: "error", error: errorText(error, "We couldn't load your matches.") };
   }
 }

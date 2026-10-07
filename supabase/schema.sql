@@ -158,9 +158,17 @@ begin
 end;
 $$;
 
-drop trigger if exists rf_on_auth_user_created on auth.users;
-create trigger rf_on_auth_user_created after insert on auth.users
-  for each row execute function public.rf_handle_new_user();
+-- Optional: the app also creates the member row itself on first sign-in,
+-- so if this project doesn't allow triggers on auth.users, setup carries on.
+do $do$
+begin
+  drop trigger if exists rf_on_auth_user_created on auth.users;
+  create trigger rf_on_auth_user_created after insert on auth.users
+    for each row execute function public.rf_handle_new_user();
+exception when others then
+  raise notice 'Skipped sign-up trigger: %', sqlerrm;
+end;
+$do$;
 
 -- Activity entries for requests and acceptances.
 create or replace function public.rf_connection_activity()
@@ -223,14 +231,30 @@ $$;
 revoke all on function public.rf_email_status(text) from public;
 grant execute on function public.rf_email_status(text) to anon, authenticated;
 
--- Members who signed up before this script ran.
-insert into public.members (id, full_name, avatar_url)
-select
-  u.id,
-  left(coalesce(u.raw_user_meta_data ->> 'full_name', u.raw_user_meta_data ->> 'name', split_part(u.email, '@', 1), ''), 80),
-  coalesce(u.raw_user_meta_data ->> 'avatar_url', u.raw_user_meta_data ->> 'picture')
-from auth.users u
-on conflict (id) do nothing;
+-- Members who signed up before this script ran (optional; the app also does this).
+do $do$
+begin
+  insert into public.members (id, full_name, avatar_url)
+  select
+    u.id,
+    left(coalesce(u.raw_user_meta_data ->> 'full_name', u.raw_user_meta_data ->> 'name', split_part(u.email, '@', 1), ''), 80),
+    coalesce(u.raw_user_meta_data ->> 'avatar_url', u.raw_user_meta_data ->> 'picture')
+  from auth.users u
+  on conflict (id) do nothing;
+exception when others then
+  raise notice 'Skipped copying existing accounts: %', sqlerrm;
+end;
+$do$;
+
+-- Access for signed-in people (row level security below decides which rows).
+grant usage on schema public to anon, authenticated;
+grant select, insert, update on public.members to authenticated;
+grant select, insert, delete on public.connections to authenticated;
+grant select, insert, delete on public.saved_members to authenticated;
+grant select, insert on public.chat_messages to authenticated;
+grant select on public.activity to authenticated;
+grant execute on function public.rf_are_connected(uuid, uuid) to authenticated;
+grant execute on function public.rf_are_linked(uuid, uuid) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Row level security
@@ -352,3 +376,6 @@ exception when others then
   raise notice 'Skipped profile photo storage setup: %', sqlerrm;
 end;
 $do$;
+
+-- Make the new tables visible to the app straight away.
+notify pgrst, 'reload schema';
